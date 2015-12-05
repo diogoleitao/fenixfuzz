@@ -1,6 +1,7 @@
 import string
 import random
 import requests
+import re
 
 # Minimum string length
 min_length = 1
@@ -10,16 +11,23 @@ max_length = 20
 garbage_strings = []
 
 
-def gen_garbage(length):  # Generates a string with a length of l containing random alphanumeric characters
-    all_chars = string.letters + string.digits
-    return ''.join(random.choice(all_chars) for i in range(length))
+# Generates a string with a length of l containing random characters and/or numbers and/or symbols
+def gen_garbage(length, mode):
+    palette = ""
+    if mode == 0:  # Characters, numbers and symbols
+        palette = string.letters + string.digits
+    elif mode == 1:  # Only characters and numbers
+        palette = string.letters + string.digits
+    elif mode == 2:  # Only characters
+        palette = string.letters
+    elif mode == 3:  # Only numbers
+        palette = string.digits
+    return ''.join(random.choice(palette) for i in range(length))
 
 if __name__ == '__main__':
-    # Initialize a list with values from min_gen_length to max_gen_length
-    lengths = []
     print "Generating garbage..."
     for i in range(min_length, max_length + 1):
-        garbage_strings.append(gen_garbage(i))
+        garbage_strings.append(gen_garbage(i, 3))
     print "Done."
     print ""
 
@@ -34,10 +42,13 @@ if __name__ == '__main__':
             http_request = requests.get(endpoint)
             print str(http_request.status_code) + " " + endpoint
         else:
+            server_error_pattern = re.compile("^5[0-9][0-9]$")
+            client_error_pattern = re.compile("^4[0-9][0-9]$")
             for fuzz_pattern in garbage_strings:
                 final_endpoint = endpoint.replace("{id}", fuzz_pattern)
                 http_request = requests.get(final_endpoint)
-                print str(http_request.status_code) + " " + final_endpoint
+                if server_error_pattern.match(str(http_request.status_code)) is not None or client_error_pattern.match(str(http_request.status_code)) is not None:
+                    print str(http_request.status_code) + " " + final_endpoint
     print "Done."
     print ""
 
@@ -52,10 +63,13 @@ if __name__ == '__main__':
             http_request = requests.put(endpoint)
             print str(http_request.status_code) + " " + endpoint
         else:
+            server_error_pattern = re.compile("^5[0-9][0-9]$")
+            client_error_pattern = re.compile("^4[0-9][0-9]$")
             for fuzz_pattern in garbage_strings:
                 final_endpoint = endpoint.replace("{id}", fuzz_pattern)
                 http_request = requests.put(final_endpoint)
-                print str(http_request.status_code) + " " + final_endpoint
+                if server_error_pattern.match(str(http_request.status_code)) is not None or client_error_pattern.match(str(http_request.status_code)) is not None:
+                    print str(http_request.status_code) + " " + final_endpoint
     print "Done."
 
     print "Nothing more to be tested. Exiting..."
