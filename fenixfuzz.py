@@ -28,6 +28,8 @@ if __name__ == '__main__':
     print "Generating garbage..."
     for i in range(min_length, max_length + 1):
         garbage_strings.append(gen_garbage(i, 3))
+    for i in range(min_length, max_length + 1):
+        garbage_strings.append(gen_garbage(i, 2))
     print "Done."
     print ""
 
@@ -71,5 +73,6 @@ if __name__ == '__main__':
                 if server_error_pattern.match(str(http_request.status_code)) is not None or client_error_pattern.match(str(http_request.status_code)) is not None:
                     print str(http_request.status_code) + " " + final_endpoint
     print "Done."
-
-    print "Nothing more to be tested. Exiting..."
+    print ""
+    print ""
+    print "Finished."
