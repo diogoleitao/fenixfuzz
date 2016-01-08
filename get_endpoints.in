@@ -19,7 +19,7 @@ https://fenix.tecnico.ulisboa.pt/api/fenix/v1/person/courses
 https://fenix.tecnico.ulisboa.pt/api/fenix/v1/person/curriculum
 https://fenix.tecnico.ulisboa.pt/api/fenix/v1/person/evaluations
 https://fenix.tecnico.ulisboa.pt/api/fenix/v1/person/payments
+https://fenix.tecnico.ulisboa.pt/api/fenix/v1/shuttle
 https://fenix.tecnico.ulisboa.pt/api/fenix/v1/spaces
 https://fenix.tecnico.ulisboa.pt/api/fenix/v1/spaces/{id}
 https://fenix.tecnico.ulisboa.pt/api/fenix/v1/spaces/{id}/blueprint
-https://fenix.tecnico.ulisboa.pt/api/fenix/v1/shuttle
