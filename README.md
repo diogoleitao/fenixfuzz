@@ -1,2 +1,2 @@
 # fenizfuzz
-A white-box fuzzer for FenixEdu
+A grey-box fuzzer for FenixEdu
