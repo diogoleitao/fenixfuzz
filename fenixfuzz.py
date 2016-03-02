@@ -16,6 +16,8 @@ test_api = False
 charset_mode = "alpha"
 # List of generated fuzz patterns to be fed
 garbage_strings = []
+# API version (to build the request URL; only needed if test_api is specified)
+api_version = 1
 
 
 # Generates a string with a given length containing random characters and/or numbers and/or symbols
@@ -54,14 +56,14 @@ def parse_input():
     final_warning = ""
 
     if len(sys.argv) < 2:
-        print "Usage:\n\tfenixfuzz.py [-min value|-max value|-gmode value|-api|-c value]"
+        print "Usage:\n\tfenixfuzz.py [-min minimum|-max maximum|-gmode generation_mode|-api|-v version|-c charset]"
         print "Options:"
-        print "\t-min:\tminimum fuzz pattern length.\n\t\tAccepted values: integers.\n\t\tDefault value: 1.\n"
+        print "\t-min:\tminimum fuzz pattern length.\n\t\tAccepted values: positive integers.\n\t\tDefault value: 1.\n"
         print "\t-max:\tmaximum fuzz pattern length.\n\t\tAccepted values: integers (greater than 0).\n\t\tDefault value: 20.\n"
         print "\t-gmode:\tfuzz pattern generation mode.\n\t\tAccepted values: \"generation\" and \"mutation\".\n\t\tDefault value: generation.\n"
-        print "\t-api:\tif passed, tests the FenixEdu API."
-        print "\t-c:\tcharset used (a combination of letters, digits, punctuation/symbols and whitespace characters).\n\t\tAccepted values: \"all\", \"no-white\", \"alpha\", \"char\" or \"dig\".\n\t\tDefault value: \"alpha\"."
-        print ""
+        print "\t-api:\tif specified, the fuzzer also tests the FenixEdu API.\n"
+        print "\t-v:\tspecifies the API version.\n\t\tAccepted values: integers (greater than 0).\n\t\tDefault value: 1.\n"
+        print "\t-c:\tcharset used for the fuzz patterns (a combination of letters, digits, punctuation/symbols and whitespace characters).\n\t\tAccepted values: \"all\", \"no-white\", \"alpha\", \"char\" or \"dig\".\n\t\tDefault value: \"alpha\".\n"
         sys.exit(0)
     else:
         if "-min" in sys.argv:
@@ -69,7 +71,7 @@ def parse_input():
             try:
                 min_length = int(sys.argv[min_index])
                 if min_length < 0:
-                    final_warning += "\n\t-min should be greater than zero."
+                    final_warning += "\n\t-min should be greater than or equal to zero."
             except ValueError:
                 final_warning += "\n\t-min should be an integer."
         else:
@@ -98,7 +100,16 @@ def parse_input():
         else:
             gmode = "generation"
 
-        test_api = "-api" in sys.argv
+        if "-api" in sys.argv:
+            test_api = True
+            if "-v" in sys.argv:
+                api_version_index = sys.argv.index("-v") + 1
+                try:
+                    api_version = int(sys.argv[api_version_index])
+                except ValueError:
+                    final_warning += "\n\t-v should be an integer."
+            else:
+                api_version = 1
 
         if "-c" in sys.argv:
             charset_index = sys.argv.index("-c") + 1
@@ -131,24 +142,25 @@ def fuzz_fenixedu_api():
         elif "PUT" in real_endpoint:
             put_endpoints.append(real_endpoint[4:])
 
+    base_url = "https://fenix.tecnico.ulisboa.pt/api/fenix/v" + api_version
     for endpoint in get_endpoints:
         if "{id}" not in endpoint:
-            http_request = requests.get(endpoint)
+            http_request = requests.get(base_url + endpoint)
             print str(http_request.status_code) + " " + endpoint
         else:
             for fuzz_pattern in garbage_strings:
                 final_endpoint = endpoint.replace("{id}", fuzz_pattern)
-                http_request = requests.get(final_endpoint)
+                http_request = requests.get(base_url + final_endpoint)
                 print str(http_request.status_code) + " " + final_endpoint
 
     for endpoint in put_endpoints:
         if "{id}" not in endpoint:
-            http_request = requests.put(endpoint)
+            http_request = requests.put(base_url + endpoint)
             print str(http_request.status_code) + " " + endpoint
         else:
             for fuzz_pattern in garbage_strings:
                 final_endpoint = endpoint.replace("{id}", fuzz_pattern)
-                http_request = requests.put(final_endpoint)
+                http_request = requests.put(base_url + final_endpoint)
                 print str(http_request.status_code) + " " + final_endpoint
 
 
@@ -161,11 +173,6 @@ def fuzz_fenixedu():
 #
 def _main():
     parse_input()
-    print min_length
-    print max_length
-    print gmode
-    print test_api
-    print charset_mode
     generate_fuzz_patterns()
     # fuzz_fenixedu_api()
     fuzz_fenixedu()
