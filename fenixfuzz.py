@@ -173,8 +173,38 @@ def fuzz_fenixedu_api():
 
 # Fuzzes the FenixEdu pages
 def fuzz_fenixedu():
-    # TODO
-    return
+    # THIS IS NOT RIGHT!
+    current_page = fenixEdu_starfleet
+
+    # LOGIN PROCESS STILL MISSING
+    # do_login()
+
+    """
+        LINKS CRAWLER
+    """
+    page = requests.get(current_page).text
+    html_tree = BeautifulSoup(page, 'html_parser')
+    all_links = html_tree.find_all('a')
+    parsed_links = []
+    for link in all_links:
+        anchor = link.get("href")
+        if "http://localhost:8080/" in anchor:
+            parsed_links.append(anchor)
+
+    """
+        FORM CRAWLER
+    """
+    all_forms = html_tree.find_all('form')
+    forms_and_fields = {}
+    forms_and_actions = {}
+    for form in all_forms:
+        forms_and_actions[form] = form.get("action")
+
+        inputs = []
+        for inpt in form.find_all("input"):
+            if inpt.get("type") != "hidden":
+                inputs.append(inpt)
+        forms_and_fields[form] = inputs
 
 
 # Main program structure
