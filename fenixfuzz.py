@@ -18,9 +18,13 @@ charset_mode = "alpha"
 garbage_strings = []
 # API version (to build the request URL; only needed if test_api is specified)
 api_version = 1
+# FenixEdu URL (with starfleet dump)
+fenixEdu_starfleet = "localhost:8080/starfleet/login"
+# FenixEdu API URL
+fenixEdu_URL_api = "http://fenixedu.org/dev/api/index.html"
 
 
-# Generates a string with a given length containing random characters and/or numbers and/or symbols
+# Returns a string with a given length containing a set of characters
 def generate_strings(length):
     if charset_mode == "all":
         # Characters, numbers, symbols and whitespaces
@@ -42,16 +46,19 @@ def generate_strings(length):
     return ''.join(random.choice(charset) for i in range(length))
 
 
-#
+# Generates fuzz patterns with length ranging from min_length to max_length
 def generate_fuzz_patterns():
     for i in range(min_length, max_length + 1):
         garbage_strings.append(generate_strings(i))
 
 
 # Parses input arguments to:
-#   - get fuzz pattern minimum and maximum length
-#   - get fuzz pattern generation mode
+#   - set fuzz pattern minimum and maximum length
+#   - set fuzz pattern generation mode
 #   - check if FenixEdu API is to also be tested
+#   - retrieve API version
+#   - set the charset to be used for the fuzz pattern generation
+# If any errors occur, it prints them and exits the main program
 def parse_input():
     final_warning = ""
 
@@ -124,15 +131,15 @@ def parse_input():
         if len(final_warning) > 0:
             final_warning = "Error(s):" + final_warning
             print final_warning
+            sys.exit(1)
 
 
-#
-#
+# Fuzzes the FenixEdu API and prints the sent requests
 def fuzz_fenixedu_api():
     get_endpoints = []
     put_endpoints = []
 
-    fenixedu_page = requests.get("http://fenixedu.org/dev/api/index.html").text
+    fenixedu_page = requests.get(fenixEdu_URL_api).text
     html_tree = BeautifulSoup(fenixedu_page, 'html.parser')
     endpoints_list = html_tree.find_all('a')
     for endpoint in endpoints_list:
@@ -164,20 +171,19 @@ def fuzz_fenixedu_api():
                 print str(http_request.status_code) + " " + final_endpoint
 
 
+# Fuzzes the FenixEdu pages
 def fuzz_fenixedu():
     # TODO
     return
 
 
-#
-#
+# Main program structure
 def _main():
     parse_input()
     generate_fuzz_patterns()
     # fuzz_fenixedu_api()
     fuzz_fenixedu()
 
-#
-#
+# Standard Python invocation
 if __name__ == '__main__':
     _main()
