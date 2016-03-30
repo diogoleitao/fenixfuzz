@@ -11,49 +11,43 @@ def quit(code):
     sys.exit(code)
 
 
-# Returns a string with a given length containing a set of characters
-def generate_strings(mode, length):
-    all_charsets = {
-        # Characters, numbers, symbols and whitespaces
-        "all": string.printable,
-
-        # Characters, numbers, symbols
-        "no-white": string.letters + string.digits + string.punctuation,
-
-        # Characters and numbers
-        "alpha": string.letters + string.digits,
-
-        # Characters
-        "char": string.letters,
-
-        # Numbers
-        "num": string.digits
-    }
-
-    charset = all_charsets[mode]
-    if charset is None:
-        charset = string.letters + string.digits
+# Returns a string with a given length containing a set of random characters
+def generateStrings(charset, length):
     return ''.join(random.choice(charset) for i in range(length))
 
 
-# Generates fuzz patterns with length ranging from min_length to max_length
-def generate_fuzz_patterns(mode, minimum, maximum):
+# Returns an array of fuzz patterns with variable lengths, ranging from min_length to max_length
+# Each string is made up of a subset of characters, based on the charset given as input
+def generateFuzzPatterns(mode, minimum, maximum):
     strings = []
     for i in range(minimum, maximum + 1):
-        strings.append(generate_strings(mode, i))
+        strings.append(generateStrings(mode, i))
     return strings
 
 
+def printFinalResults():
+    return
+
+
 # Parses command line arguments to:
-#   - set fuzz pattern minimum and maximum length
-#   - set fuzz pattern generation mode
-#   - check if FenixEdu API is to also be tested
-#   - retrieve API version
-#   - set the charset to be used for the fuzz pattern generation
+#   - set fuzz pattern's minimum and maximum length
+#   - set fuzz pattern's generation mode
+#   - check if FenixEdu API is to be tested as well
+#   - retrieve API version (when the API is being tested)
+#   - set the charset used for the fuzz pattern generation
 #   - choose the type of user to access FenixEdu: student, teacher or system administrator
-# If any errors occur, it prints them and exits the main program
-def parse_input(minimum, maximum, mode, api, charset, version, user):
-    final_warning = ""
+# If any errors occur, they are printed out and the main program terminates
+def parseInput():
+    default_warning = "Option {0} was not specified; using default value: {1}"
+
+    minimum = 1
+    maximum = 20
+    mode = "generation"
+    api = False
+    charset = string.letters + string.digits
+    version = 1
+    user = "student"
+    final_error = ""
 
     if "-h" in sys.argv:
         print "Usage:\n\tfenixfuzz.py -min minimum  -max maximum  -gmode generation_mode  -api  -v version  -c charset  -u user"
@@ -72,24 +66,24 @@ def parse_input(minimum, maximum, mode, api, charset, version, user):
             try:
                 minimum = int(sys.argv[min_index])
                 if minimum < 0:
-                    final_warning += "\n\t-min should be greater than or equal to zero."
+                    final_error += "\n\t-min should be greater than or equal to zero."
             except ValueError:
-                final_warning += "\n\t-min should be an integer."
+                final_error += "\n\t-min should be an integer."
         else:
-            minimum = 1
+            print default_warning.format("-min", str(minimum))
 
         if "-max" in sys.argv:
             max_index = sys.argv.index("-max") + 1
             try:
                 maximum = int(sys.argv[max_index])
                 if maximum < 1:
-                    final_warning += "\n\t-max should be greater than zero."
+                    final_error += "\n\t-max should be greater than zero."
                 elif maximum < minimum:
-                    final_warning += "\n\t-max should be greater than -min."
+                    final_error += "\n\t-max should be greater than -min."
             except ValueError:
-                final_warning += "\n\t-max should be an integer."
+                final_error += "\n\t-max should be an integer."
         else:
-            minimum = 20
+            print default_warning.format("-max", str(maximum))
 
         if "-gmode" in sys.argv:
             gmode_index = sys.argv.index("-gmode") + 1
@@ -97,9 +91,9 @@ def parse_input(minimum, maximum, mode, api, charset, version, user):
             if mode == "generation" or mode == "mutation":
                 pass
             else:
-                final_warning += "\n\t-gmode should be either generation or mutation."
+                final_error += "\n\t-gmode should be either generation or mutation."
         else:
-            mode = "generation"
+            print default_warning.format("-gmode", mode)
 
         if "-api" in sys.argv:
             api = True
@@ -108,19 +102,38 @@ def parse_input(minimum, maximum, mode, api, charset, version, user):
                 try:
                     version = int(sys.argv[api_version_index])
                 except ValueError:
-                    final_warning += "\n\t-v should be an integer."
+                    final_error += "\n\t-v should be an integer."
             else:
-                version = 1
+                print default_warning.format("-v", str(version))
+        else:
+            print default_warning.format("-api", str(api))
 
         if "-c" in sys.argv:
             charset_index = sys.argv.index("-c") + 1
             charset = sys.argv[charset_index]
-            if charset == "all" or charset == "no-white" or charset == "alpha" or charset == "char" or charset == "num":
-                pass
-            else:
-                final_warning += "\n\t-c should be either all, no-white, alpha, char or num."
+            all_charsets = {
+                # Alphanumeric, symbols and whitespace characters
+                "all": string.printable,
+
+                # Alphanumeric and symbols
+                "no-white": string.letters + string.digits + string.punctuation,
+
+                # Alphanumeric
+                "alpha": string.letters + string.digits,
+
+                # Characters
+                "char": string.letters,
+
+                # Numbers
+                "num": string.digits
+            }
+
+            try:
+                charset = all_charsets[charset]
+            except KeyError:
+                final_error += "\n\t-c should be either all, no-white, alpha, char or num."
         else:
-            charset = "alpha"
+            print default_warning.format("-c", charset)
 
         if "-u" in sys.argv:
             user_index = sys.argv.index("-u") + 1
@@ -128,18 +141,20 @@ def parse_input(minimum, maximum, mode, api, charset, version, user):
             if user == "student" or user == "teacher" or user == "sysadm":
                 pass
             else:
-                final_warning += "\n\t-u should be either student, teacher or sysadm."
+                final_error += "\n\t-u should be either student, teacher or sysadm."
+        else:
+            print default_warning.format("-u", user)
 
-        if len(final_warning) > 0:
-            final_warning = "Error(s):" + final_warning
-            print final_warning
+        if len(final_error) > 0:
+            final_error = "Error(s):" + final_error
+            print final_error
             quit(1)
         else:
             return minimum, maximum, mode, api, charset, version, user
 
 
 # Fuzzes the FenixEdu API and prints the sent requests
-def fuzz_fenixedu_api(fuzz_patterns, version):
+def fuzzFenixeduAPI(fuzz_patterns, version):
     fenixEdu_URL_api = "http://fenixedu.org/dev/api/index.html"
     get_endpoints = []
     put_endpoints = []
@@ -156,42 +171,40 @@ def fuzz_fenixedu_api(fuzz_patterns, version):
 
     base_url = "https://fenix.tecnico.ulisboa.pt/api/fenix/v" + str(version)
     server_error_pattern = re.compile("^5[0-9][0-9]$")
+
     for endpoint in get_endpoints:
-        if "{id}" not in endpoint:
-            pass
-            # http_request = requests.get(base_url + endpoint)
-            # print str(http_request.status_code) + " " + endpoint
-        else:
+        if "{id}" in endpoint:
             for fuzz_pattern in fuzz_patterns:
                 final_endpoint = endpoint.replace("{id}", fuzz_pattern)
                 http_request = requests.get(base_url + final_endpoint)
                 if server_error_pattern.match(str(http_request.status_code)):
                     print str(http_request.status_code) + " " + final_endpoint
+        else:
+            # Endpoints without parameters can't be fuzzed
+            pass
 
     for endpoint in put_endpoints:
-        if "{id}" not in endpoint:
-            pass
-            # http_request = requests.put(base_url + endpoint)
-            # print str(http_request.status_code) + " " + endpoint
-        else:
+        if "{id}" in endpoint:
             for fuzz_pattern in fuzz_patterns:
                 final_endpoint = endpoint.replace("{id}", fuzz_pattern)
                 http_request = requests.put(base_url + final_endpoint)
                 if server_error_pattern.match(str(http_request.status_code)):
                     print str(http_request.status_code) + " " + final_endpoint
+        else:
+            # Endpoints without parameters can't be fuzzed
+            pass
 
 
 # Fuzzes the FenixEdu pages
-def fuzz_fenixedu(fuzz_patterns):
+def fuzzFenixedu(fuzz_patterns):
     fenixEdu_starfleet = "localhost:8080/starfleet/login"
 
-    # THIS IS NOT RIGHT!
+    # It should iterate through the crawled pages
     current_page = fenixEdu_starfleet
 
-    # LOGIN PROCESS STILL MISSING
-    # do_login()
+    # test.py
 
-    # LINKS CRAWLER
+    # PAGE CRAWLER
     page = requests.get(current_page).text
     html_tree = BeautifulSoup(page, 'html_parser')
     all_links = html_tree.find_all('a')
@@ -219,10 +232,10 @@ def fuzz_fenixedu(fuzz_patterns):
 def _main():
     """
         Since Python only allows variables to be defined and not declared,
-        all of them are assigned a given value, but it does not reflect
-        the actual final value (that is, the value assigned when the
-        script is running). This is avoided with the parse_input()
-        function (see its documentation).
+        all of them are assigned a "default" value, but that does not reflect
+        its final value (that is, the value assigned when the script is
+        running). This is avoided with the parseInput() function (see its
+        documentation).
     """
 
     # Minimum fuzz pattern string length
@@ -234,39 +247,34 @@ def _main():
     # If True, tests FenixEdu API
     test_api = False
     # Charset command line option
-    charset_mode = ""
-    # List of generated fuzz patterns to be fed
+    charset = ""
+    # List of generated fuzz patterns
     garbage_strings = []
-    # API version (used to build the request URL; only needed if test_api is specified)
+    # API version (only used if test_api is specified, to build the request URL)
     api_version = 0
     # User role to perform login
     user_role = ""
 
-    variables_tuple = parse_input(min_length, max_length, gmode, test_api, charset_mode, api_version, user_role)
+    parsed_input_values = parseInput()
 
-    min_length = variables_tuple[0]
-    max_length = variables_tuple[1]
-    gmode = variables_tuple[2]
-    test_api = variables_tuple[3]
-    charset_mode = variables_tuple[4]
-    api_version = variables_tuple[5]
-    user_role = variables_tuple[6]
+    min_length = parsed_input_values[0]
+    max_length = parsed_input_values[1]
+    gmode = parsed_input_values[2]
+    test_api = parsed_input_values[3]
+    charset = parsed_input_values[4]
+    api_version = parsed_input_values[5]
+    user_role = parsed_input_values[6]
 
-    # print min_length
-    # print max_length
-    # print gmode
-    # print test_api
-    # print charset_mode
-    # print api_version
-    # print user_role
-
-    garbage_strings = generate_fuzz_patterns(charset_mode, min_length, max_length)
+    garbage_strings = generateFuzzPatterns(charset, min_length, max_length)
 
     if test_api:
-        fuzz_fenixedu_api(garbage_strings, api_version)
+        fuzzFenixeduAPI(garbage_strings, api_version)
 
-    # fuzz_fenixedu(garbage_strings)
+    # fuzzFenixedu(garbage_strings)
 
-# Standard Python invocation
+    printFinalResults()
+
+
+# Standard Python 'main' function invocation
 if __name__ == '__main__':
     _main()
