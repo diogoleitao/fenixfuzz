@@ -6,37 +6,51 @@ import re
 from bs4 import BeautifulSoup
 
 
-# Prettier exit function
+# "Prettier" exit function.
 def quit(code):
     sys.exit(code)
 
 
-# Returns a string with a given length containing a set of random characters
+# Returns a string with a given length containing a subset of characters from
+# a given charset.
 def generateStrings(charset, length):
     return ''.join(random.choice(charset) for i in range(length))
 
 
-# Returns an array of fuzz patterns with variable lengths, ranging from min_length to max_length
-# Each string is made up of a subset of characters, based on the charset given as input
-def generateFuzzPatterns(mode, minimum, maximum):
-    strings = []
-    for i in range(minimum, maximum + 1):
-        strings.append(generateStrings(mode, i))
-    return strings
+# Returns an array of fuzz pattern strings with variable lengths, ranging from
+# min_length to max_length. Each string is made up of a subset of characters,
+# based on the charset given as input.
+def generateFuzzPatterns(charset, minimum, maximum, gmode):
+    if gmode == "generation":
+        strings = []
+        for i in range(minimum, maximum + 1):
+            strings.append(generateStrings(charset, i))
+        return strings
+    elif gmode == "mutation":
+        known_bad = []
+        with open("bad_input", "r") as bad_input_file:
+            known_bad.append(bad_input_file.readline)
+        # DO MUTATION ON ACQUIRED STRING
 
 
+# NEEDS TO BE DETERMINED IN WHAT WAY IT IS PRESENTED AND WHAT INFORMATION IS
+# IMPORTANT TO BE SHOWN TO THE FENIXEDU DEVELOPERS
 def printFinalResults():
     return
 
 
 # Parses command line arguments to:
-#   - set fuzz pattern's minimum and maximum length
-#   - set fuzz pattern's generation mode
-#   - check if FenixEdu API is to be tested as well
-#   - retrieve API version (when the API is being tested)
-#   - set the charset used for the fuzz pattern generation
-#   - choose the type of user to access FenixEdu: student, teacher or system administrator
-# If any errors occur, they are printed out and the main program terminates
+#   - set fuzz pattern's minimum and maximum length;
+#   - set fuzz pattern's generation mode;
+#   - check if FenixEdu API is to be tested as well;
+#   - retrieve API version (for when the API is being tested);
+#   - set the charset used for the fuzz pattern generation;
+#   - choose the type of user to access FenixEdu: student, teacher or system
+#     administrator;
+# Some arguments have default values; so, if they're not specified, each option
+# will fall back to its default value. Note however that some options must be
+# specified, and thus, don't have default values.
+# If any errors occur, they are printed out and the main program terminates.
 def parseInput():
     default_warning = "Option {0} was not specified; using default value: {1}"
 
@@ -56,9 +70,9 @@ def parseInput():
         print "\t-max:\tmaximum fuzz pattern length.\n\t\tAccepted values: positive integers.\n\t\tDefault value: 20.\n"
         print "\t-gmode:\tfuzz pattern generation mode.\n\t\tAccepted values: generation and mutation.\n\t\tDefault value: generation.\n"
         print "\t-api:\tif specified, the fuzzer also tests the FenixEdu API.\n"
-        print "\t-v:\tspecifies the API version (useless if -api is not specified).\n\t\tAccepted values: positive integers.\n\t\tDefault value: 1.\n"
-        print "\t-c:\tcharset used for the fuzz patterns (a combination of letters, digits, punctuation/symbols and whitespace characters).\n\t\tAccepted values: all, no-white, alpha, char or num.\n\t\tDefault value: alpha.\n"
-        print "\t-u:\tuser role used for the login process.\n\t\tAccepted values: student, teacher or sysadm.\n\t\tDefault value: ?.\n"
+        print "\t-v:\tspecifies the API version.\n\t\tAccepted values: positive integers.\n\t\tDefault value: 1.\n"
+        print "\t-c:\tcharset used for the fuzz patterns (letters, digits, punctuation/symbols, whitespace characters).\n\t\tAccepted values: all, no-white, alpha, char or num.\n\t\tDefault value: none.\n"
+        print "\t-u:\tuser role used for the login process.\n\t\tAccepted values: student, teacher or system administrator.\n\t\tDefault value: none.\n"
         quit(0)
     else:
         if "-min" in sys.argv:
@@ -133,17 +147,24 @@ def parseInput():
             except KeyError:
                 final_error += "\n\t-c should be either all, no-white, alpha, char or num."
         else:
-            print default_warning.format("-c", charset)
+            final_error += "\n\t-c must be specified (all, no-white, alpha, char, num)."
 
         if "-u" in sys.argv:
             user_index = sys.argv.index("-u") + 1
             user = sys.argv[user_index]
-            if user == "student" or user == "teacher" or user == "sysadm":
-                pass
-            else:
+            teacher = random.randrange(2, 15, 1)
+            student = random.randrange(16, 30, 1)
+            all_users = {
+                'sysadm': 'SA1',
+                'teacher': 'SA' + teacher,
+                'student': 'SA' + student
+            }
+            try:
+                user = all_users[user]
+            except KeyError:
                 final_error += "\n\t-u should be either student, teacher or sysadm."
         else:
-            print default_warning.format("-u", user)
+            final_error += "\n\t-u must be specified (student, teacher, sysadm)."
 
         if len(final_error) > 0:
             final_error = "Error(s):" + final_error
@@ -153,7 +174,11 @@ def parseInput():
             return minimum, maximum, mode, api, charset, version, user
 
 
-# Fuzzes the FenixEdu API and prints the sent requests
+# Fuzzes the FenixEdu API and prints the requests sent which triggered a server
+# side error. The API endpoints are retrieved via its documentation webpage, by
+# parsing the bullet list and retrieving only the endpoint (e.g.: /courses/{id}).
+# The final URL used for the request is built using th base url, concatenated
+# with the current endpoint being tested and with the current fuzz pattern.
 def fuzzFenixeduAPI(fuzz_patterns, version):
     fenixEdu_URL_api = "http://fenixedu.org/dev/api/index.html"
     get_endpoints = []
@@ -195,37 +220,44 @@ def fuzzFenixeduAPI(fuzz_patterns, version):
             pass
 
 
+# Performs login at the local Fenix instance and returns a dictionary
+# containing the cookies needed for each request.
+def doLogin(user):
+    request_url = "http://localhost:8080/starfleet/api/bennu-core/profile/login"
+
+    response = requests.post(request_url, data={'username': user, 'password': ''})
+    cookie_values = response.headers.get('set-cookie').replace(';', '').replace(',', '').split(' ')
+    context_path = cookie_values[0].split('=')[1]
+    cookie = cookie_values[2].split('=')[1]
+
+    cookies = {
+        'JSESSION_ID': cookie,
+        'contextPath': context_path
+    }
+
+    return cookies
+
+
 # Fuzzes the FenixEdu pages
-def fuzzFenixedu(fuzz_patterns):
-    fenixEdu_starfleet = "localhost:8080/starfleet/login"
+# TODO: add details
+def fuzzFenixedu(fuzz_patterns, user):
+    COOKIES = doLogin(user)
 
-    # It should iterate through the crawled pages
-    current_page = fenixEdu_starfleet
+    landing_page_url = "http://localhost:8080" + COOKIES['contextPath'] + "/home.do"
+    landing_page = requests.post(landing_page_url, cookies=COOKIES).text
+    landing_page_html_tree = BeautifulSoup(landing_page, 'html.parser')
 
-    # test.py
-
-    # PAGE CRAWLER
-    page = requests.get(current_page).text
-    html_tree = BeautifulSoup(page, 'html_parser')
-    all_links = html_tree.find_all('a')
-    parsed_links = []
-    for link in all_links:
-        anchor = link.get("href")
-        if "http://localhost:8080/" in anchor:
-            parsed_links.append(anchor)
-
-    # FORM CRAWLER
-    all_forms = html_tree.find_all('form')
-    forms_and_fields = {}
+    all_forms = landing_page_html_tree.find_all('form')
+    forms_and_inputs = {}
     forms_and_actions = {}
-    for form in all_forms:
-        forms_and_actions[form] = form.get("action")
-
-        inputs = []
-        for inpt in form.find_all("input"):
-            if inpt.get("type") != "hidden":
-                inputs.append(inpt)
-        forms_and_fields[form] = inputs
+    if len(all_forms) != 0:
+        for form in all_forms:
+            forms_and_actions[form] = form.get("action")
+            inputs_and_types = {}
+            for inpt in form.find_all("input"):
+                if inpt.get("type") != "hidden":
+                    inputs_and_types[inpt] = type
+            forms_and_inputs[form] = inputs_and_types
 
 
 # Main program
@@ -239,38 +271,41 @@ def _main():
     """
 
     # Minimum fuzz pattern string length
-    min_length = 0
+    MIN_LENGTH = 0
     # Maximum fuzz pattern string length
-    max_length = 0
+    MAX_LENGTH = 0
     # Fuzz pattern generation mode
-    gmode = ""
+    GMODE = ""
     # If True, tests FenixEdu API
-    test_api = False
+    TEST_API = False
     # Charset command line option
-    charset = ""
+    CHARSET = ""
     # List of generated fuzz patterns
-    garbage_strings = []
+    GARBAGE_STRINGS = []
     # API version (only used if test_api is specified, to build the request URL)
-    api_version = 0
+    API_VERSION = 0
     # User role to perform login
-    user_role = ""
+    USER_ROLE = ""
+    #
+    COOKIE = ""
+    #
+    CONTEXT_PATH = ""
 
     parsed_input_values = parseInput()
+    MIN_LENGTH = parsed_input_values[0]
+    MAX_LENGTH = parsed_input_values[1]
+    GMODE = parsed_input_values[2]
+    TEST_API = parsed_input_values[3]
+    CHARSET = parsed_input_values[4]
+    API_VERSION = parsed_input_values[5]
+    USER_ROLE = parsed_input_values[6]
 
-    min_length = parsed_input_values[0]
-    max_length = parsed_input_values[1]
-    gmode = parsed_input_values[2]
-    test_api = parsed_input_values[3]
-    charset = parsed_input_values[4]
-    api_version = parsed_input_values[5]
-    user_role = parsed_input_values[6]
+    GARBAGE_STRINGS = generateFuzzPatterns(CHARSET, MIN_LENGTH, MAX_LENGTH)
 
-    garbage_strings = generateFuzzPatterns(charset, min_length, max_length)
+    if TEST_API:
+        fuzzFenixeduAPI(GARBAGE_STRINGS, API_VERSION)
 
-    if test_api:
-        fuzzFenixeduAPI(garbage_strings, api_version)
-
-    # fuzzFenixedu(garbage_strings)
+    # fuzzFenixedu(GARBAGE_STRINGS, USER_ROLE)
 
     printFinalResults()
 
