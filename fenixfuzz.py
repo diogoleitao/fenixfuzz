@@ -156,8 +156,8 @@ def parseInput():
             student = random.randrange(16, 30, 1)
             all_users = {
                 'sysadm': 'SA1',
-                'teacher': 'SA' + teacher,
-                'student': 'SA' + student
+                'teacher': 'SA15',
+                'student': 'SA20'
             }
             try:
                 user = all_users[user]
@@ -189,9 +189,9 @@ def fuzzFenixeduAPI(fuzz_patterns, version):
     endpoints_list = html_tree.find_all('a')
     for endpoint in endpoints_list:
         real_endpoint = endpoint.getText()
-        if "GET" in real_endpoint:
+        if real_endpoint.startswith("GET"):
             get_endpoints.append(real_endpoint[4:])
-        elif "PUT" in real_endpoint:
+        elif real_endpoint.startswith("PUT"):
             put_endpoints.append(real_endpoint[4:])
 
     base_url = "https://fenix.tecnico.ulisboa.pt/api/fenix/v" + str(version)
@@ -300,7 +300,7 @@ def _main():
     API_VERSION = parsed_input_values[5]
     USER_ROLE = parsed_input_values[6]
 
-    GARBAGE_STRINGS = generateFuzzPatterns(CHARSET, MIN_LENGTH, MAX_LENGTH)
+    GARBAGE_STRINGS = generateFuzzPatterns(CHARSET, MIN_LENGTH, MAX_LENGTH, GMODE)
 
     if TEST_API:
         fuzzFenixeduAPI(GARBAGE_STRINGS, API_VERSION)
