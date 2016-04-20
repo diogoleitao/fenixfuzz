@@ -12,9 +12,6 @@ class Submitter:
         if method == "GET":
             request = requests.get(url, cookies=cookies)
             ok = True
-        elif method == "PUT":
-            request = requests.put(url, cookies=cookies)
-            ok = True
         elif method == "POST":
             request = requests.post(url, cookies=cookies)
             ok = True
