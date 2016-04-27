@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import globalvars
+import string
 
 
 class LinkCrawler:
@@ -14,8 +15,17 @@ class LinkCrawler:
             self.url_seed = url_seed
         self.cookies = cookies
 
+    def filterURL(self):
+        has_strange_characters = not all(char in string.printable for char in self.url_seed)
+        logout = "/logout" in self.url_seed
+        download_file = "/downloadFile" in self.url_seed
+
+        return not has_strange_characters and not logout and not download_file
+
     def crawl(self):
-        if "logout" not in self.url_seed:
+        ok = self.filterURL()
+
+        if ok:
             print self.url_seed
             request = requests.get(self.url_seed, cookies=self.cookies)
             html_tree = request.text
@@ -26,7 +36,7 @@ class LinkCrawler:
                     # Only save same domain links
                     if href.startswith(globalvars.cookies['contextPath']) or href.startswith(globalvars.base_url):
                         if href not in globalvars.crawled_links_queue:
-                            print "\t" + href
+                            # print "\t" + href
                             globalvars.crawled_links_queue.append(href)
                             globalvars.links_queue.append(href)
 

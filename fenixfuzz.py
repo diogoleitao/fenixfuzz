@@ -152,12 +152,12 @@ def parseInput():
         if "-u" in sys.argv:
             user_index = sys.argv.index("-u") + 1
             user = sys.argv[user_index]
-            teacher = random.randrange(2, 15, 1)
-            student = random.randrange(16, 30, 1)
+            teacher = str(random.randrange(2, 15, 1))
+            student = str(random.randrange(16, 30, 1))
             all_users = {
                 'sysadm': 'SA1',
-                'teacher': 'SA15',
-                'student': 'SA20'
+                'teacher': 'SA' + teacher,
+                'student': 'SA' + student
             }
             try:
                 user = all_users[user]
