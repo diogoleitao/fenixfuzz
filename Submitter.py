@@ -9,6 +9,7 @@ class Submitter:
     def submit(self, url, method, cookies, toPrint):
         request = None
         ok = False
+        method = method.lower()
         if method == "GET":
             request = requests.get(url, cookies=cookies)
             ok = True
