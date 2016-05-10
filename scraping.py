@@ -7,21 +7,19 @@ import string
 from bs4 import BeautifulSoup
 
 import globalvars
+from Submitter import Submitter
 
 
 class LinkCrawler(object):
     """
-        Sample docstring
+        bla
     """
     url_seed = ""
     cookies = {}
     ignore_patterns = ["/logout", "/downloadFile"]
 
     def __init__(self, url_seed, cookies):
-        if url_seed.startswith("/"):
-            self.url_seed = globalvars.BASE_URL + url_seed
-        else:
-            self.url_seed = url_seed
+        self.url_seed = url_seed
         self.cookies = cookies
 
     def filter_url(self):
@@ -31,6 +29,7 @@ class LinkCrawler(object):
             the associated GET requests that may be performed have results
             that compromise the tool's flow.
         """
+
         has_strange_characters = not all(char in string.printable for char in self.url_seed)
         has_pattern_occurences = any(pattern in self.url_seed for pattern in self.ignore_patterns)
 
@@ -38,7 +37,9 @@ class LinkCrawler(object):
 
     def crawl(self):
         """
-            Crawls
+            Crawls the page returned by the GET request performed on the
+            instance's url, looking for all the links the page has and adds each
+            link if it's not present in the CRAWLED_LINKS_QUEUE global variable
         """
         filtered = self.filter_url()
 
@@ -65,41 +66,41 @@ class LinkCrawler(object):
 
 
 class FormParser(object):
-    """Sample docstring"""
+    """
+        bla
+    """
     url = ""
     cookies = {}
-    hidden_fields = []
 
     def __init__(self, url, cookies):
-        # NEEDS TO BE PROCESSED THE SAME WAY AS THE
-        # LINKCRAWLER. THIS, HOWEVER, SHOULD BE FIXED
         self.url = url
         self.cookies = cookies
 
     def parse(self):
-        """Parses"""
+        """
+            Parses
+        """
         request = requests.get(self.url, cookies=self.cookies)
         html_tree = request.text
         forms = BeautifulSoup(html_tree, 'html.parser').find_all('form')
         for form in forms:
+            form_data_payload = {}
             fields = form.find_all('input')
+            hidden_fields = form.find_all('input', type='hidden')
+            for hidden_field in hidden_fields:
+                form_data_payload[hidden_field.get('name')] = hidden_field.get('value')
             for field in fields:
                 field_type = field.get('type')
                 try:
                     if field_type == 'hidden':
-                        self.hidden_fields.append(field)
-                        print "hidden"
-                        print "Not implemented"
                         continue
-                    elif field_type == 'text' or field_type == 'textarea':
-                        # Fill 'value' with fuzz patterns
-                        print "text"
-                        print "Not implemented"
                     else:
-                        print "other"
-                        print "Not implemented"
+                        form_data_payload[field.get('name')] = ""  # GENERATE FUZZ PATTERN --> EXTRACT GENERATOR TO A CLASS
+                        print(field_type)
                 except AttributeError:
                     # Some field type attributes are blank or aren't of
                     # type 'string', which can't be coerced; so, we
                     # just ignore the errors
                     continue
+            submitter = Submitter(self.url, self.cookies, form.get('action'), form_data_payload, False)
+            submitter.submit()

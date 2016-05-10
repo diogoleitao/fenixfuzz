@@ -77,29 +77,29 @@ def parse_input():
     errors = ""
 
     if "-h" in sys.argv or "--help" in sys.argv:
-        print "Usage:\tfenixfuzz.py [OPTIONS]"
-        print "Some options don't have a default value and must be specified, or else the script won't run.\n"
-        print "Options:"
-        print "-m, --minimum:\tminimum fuzz pattern length.\n\
+        print("Usage:\tfenixfuzz.py [OPTIONS]")
+        print("Some options don't have a default value and must be specified, or else the script won't run.\n")
+        print("Options:")
+        print("-m, --minimum:\tminimum fuzz pattern length.\n\
                 Accepted values: positive integers.\n\
-                Default value: 1.\n"
-        print "-M, --maximum:\tmaximum fuzz pattern length.\n\
+                Default value: 1.\n")
+        print("-M, --maximum:\tmaximum fuzz pattern length.\n\
                 Accepted values: positive integers.\n\
-                Default value: 20.\n"
-        print "-g, --genmode:\tfuzz pattern generation mode.\n\
+                Default value: 20.\n")
+        print("-g, --genmode:\tfuzz pattern generation mode.\n\
                 Accepted values: generation, mutation.\n\
-                Default value: generation.\n"
-        print "-api:\t\tif specified, the fuzzer also tests the FenixEdu API.\n"
-        print "-v, --version:\tspecifies the API version.\n\
+                Default value: generation.\n")
+        print("-api:\t\tif specified, the fuzzer also tests the FenixEdu API.\n")
+        print("-v, --version:\tspecifies the API version.\n\
                 Accepted values: positive integers.\n\
-                Default value: 1.\n"
-        print "-c, --charset:\tcharset used for the fuzz patterns.\n\
+                Default value: 1.\n")
+        print("-c, --charset:\tcharset used for the fuzz patterns.\n\
                 Accepted values: all, no-white, alpha, char, num.\n\
-                Default value: none.\n"
-        print "-u, --user:\tuser role used for the login process.\n\
+                Default value: none.\n")
+        print("-u, --user:\tuser role used for the login process.\n\
                 Accepted values: student, teacher or system administrator.\n\
-                Default value: none.\n"
-        print "-h, --help:\tshows this text."
+                Default value: none.\n")
+        print("-h, --help:\tshows this text.")
         sys.exit(0)
     else:
         if "-m" in sys.argv or "--minimum" in sys.argv:
@@ -114,7 +114,7 @@ def parse_input():
             except ValueError:
                 errors += "\n\t- Minimum length should be an integer."
         else:
-            print defaults_warning.format("-m", str(minimum))
+            print(defaults_warning.format("-m", str(minimum)))
 
         if "-M" in sys.argv or "--maximum" in sys.argv:
             try:
@@ -130,7 +130,7 @@ def parse_input():
             except ValueError:
                 errors += "\n\t- Maximum length should be an integer."
         else:
-            print defaults_warning.format("-M", str(maximum))
+            print(defaults_warning.format("-M", str(maximum)))
 
         if "-g" in sys.argv or "--genmode" in sys.argv:
             try:
@@ -143,7 +143,7 @@ def parse_input():
             else:
                 errors += "\n\t- Generation mode should be generation or mutation."
         else:
-            print defaults_warning.format("-g", mode)
+            print(defaults_warning.format("-g", mode))
 
         if "-api" in sys.argv:
             api = True
@@ -157,9 +157,9 @@ def parse_input():
                 except ValueError:
                     errors += "\n\t-Version should be an integer."
             else:
-                print defaults_warning.format("-v", str(version))
+                print(defaults_warning.format("-v", str(version)))
         else:
-            print defaults_warning.format("-api", str(api))
+            print(defaults_warning.format("-api", str(api)))
 
         if "-c" in sys.argv or "--charset" in sys.argv:
             try:
@@ -212,7 +212,7 @@ def parse_input():
             errors += "\n\t- User must be specified (student, teacher, sysadm)."
 
         if len(errors) > 0:
-            print "Error(s):" + errors
+            print("Error(s):" + errors)
             sys.exit(1)
         else:
             globalvars.MIN_LENGTH = minimum
@@ -257,7 +257,7 @@ def fuzz_fenixedu_api(version, fuzz_patterns):
                 final_endpoint = endpoint.replace("{id}", fuzz_pattern)
                 http_request = requests.get(base_url + final_endpoint)
                 if server_error_pattern.match(str(http_request.status_code)):
-                    print str(http_request.status_code) + " " + final_endpoint
+                    print(str(http_request.status_code) + " " + final_endpoint)
 
     for endpoint in put_endpoints:
         if "{id}" in endpoint:
@@ -265,7 +265,7 @@ def fuzz_fenixedu_api(version, fuzz_patterns):
                 final_endpoint = endpoint.replace("{id}", fuzz_pattern)
                 http_request = requests.put(base_url + final_endpoint)
                 if server_error_pattern.match(str(http_request.status_code)):
-                    print str(http_request.status_code) + " " + final_endpoint
+                    print(str(http_request.status_code) + " " + final_endpoint)
 
 
 def login(role):
