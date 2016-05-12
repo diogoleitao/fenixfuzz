@@ -71,7 +71,7 @@ def parse_input():
     maximum = 20
     mode = "generation"
     api = False
-    charset = string.letters + string.digits
+    charset = string.ascii_letters + string.digits
     version = 1
     user = "student"
     errors = ""
@@ -172,13 +172,13 @@ def parse_input():
                 "all": string.printable,
 
                 # Alphanumeric and symbols
-                "no-white": string.letters + string.digits + string.punctuation,
+                "no-white": string.ascii_letters + string.digits + string.punctuation,
 
                 # Alphanumeric
-                "alpha": string.letters + string.digits,
+                "alpha": string.ascii_letters + string.digits,
 
                 # Characters
-                "char": string.letters,
+                "char": string.ascii_letters,
 
                 # Numbers
                 "num": string.digits

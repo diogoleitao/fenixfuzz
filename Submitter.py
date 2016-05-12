@@ -5,7 +5,10 @@ import requests
 
 class Submitter(object):
     """
-        Sample docstring
+        The Submitter class is responsible for sending the requests to the
+        Fenix platform. Although this could be a simple function, in order to
+        improve this tool's performance, this responsability was put into this
+        module so that the submit() method can be used by "parallel" threads
     """
 
     url = ""
@@ -39,4 +42,4 @@ class Submitter(object):
             server_error_pattern = re.compile("^5[0-9][0-9]$")
             status_code = str(request.status_code)
             if server_error_pattern.match(status_code):
-                return status_code + " " + self.url
+                print(status_code + " " + self.url)
