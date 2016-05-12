@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 
 import globalvars
 from Submitter import Submitter
+from FuzzGenerator import FuzzGenerator
 
 
 class LinkCrawler(object):
@@ -95,7 +96,10 @@ class FormParser(object):
                     if field_type == 'hidden':
                         continue
                     else:
-                        form_data_payload[field.get('name')] = ""  # GENERATE FUZZ PATTERN --> EXTRACT GENERATOR TO A CLASS
+                        max_length = field.get('max')
+                        min_length = field.get('min')
+                        fuzz_generator = FuzzGenerator()
+                        form_data_payload[field.get('name')] = fuzz_generator.generate(field_type, max_length, min_length)  # GENERATE FUZZ PATTERN --> EXTRACT GENERATOR TO A CLASS
                         print(field_type)
                 except AttributeError:
                     # Some field type attributes are blank or aren't of
