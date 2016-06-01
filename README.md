@@ -1,7 +1,7 @@
 # FenixFuzz
 FenixFuzz is a software fuzzer for [IST](http://tecnico.ulisboa.pt/)'s FenixEdu system, developed within the scope of a MSc thesis. The main goal is to integrate this tool in the FenixEdu's development and build process, so that bugs are spotted earlier.
 
-## Procedure overview
+## Overview
 1. FenixFuzz logs in through a local instance of [FenixEdu](http://fenixedu.org/) with a given user and crawls every page it can reach;
 2. For each page, retrieves the associated forms and fills them with fuzz patterns, either using generation-based or mutation-based fuzzing (see *Configuring FenixFuzz*);
 3. After filling each form, the fuzzer submits it and prints the result obtained.
