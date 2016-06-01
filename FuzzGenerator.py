@@ -1,5 +1,3 @@
-"""module"""
-
 import random
 import string
 
@@ -8,6 +6,10 @@ import globalvars
 
 class FuzzGenerator(object):
     """Generator"""
+
+    field_types_to_charset = {
+        "text": "char"
+    }
 
     charsets = {
         # Alphanumeric, symbols and whitespace characters
@@ -54,16 +56,16 @@ class FuzzGenerator(object):
             for i in range(minimum, maximum + 1):
                 charset = globalvars.CHARSET
                 if field_type is not None:
-                    charset = self.charsets[field_type]
+                    charset = self.charsets[self.field_types_to_charset[field_type]]
                 return self.generate_strings(charset, i)
 
-        if globalvars.GMODE == "generation":
-            fuzz_patterns = []
-            for i in range(globalvars.MIN_LENGTH, globalvars.MAX_LENGTH + 1):
-                fuzz_patterns.append(self.generate_strings(globalvars.CHARSET, i))
-            globalvars.GARBAGE_STRINGS = fuzz_patterns
-        elif globalvars.GMODE == "mutation":
-            known_bad = []
-            with open("bad_input", "r") as bad_input_file:
-                known_bad.append(bad_input_file.readline)
-            # DO MUTATION ON ACQUIRED STRING
+        # if globalvars.GMODE == "generation":
+        #     fuzz_patterns = []
+        #     for i in range(globalvars.MIN_LENGTH, globalvars.MAX_LENGTH + 1):
+        #         fuzz_patterns.append(self.generate_strings(globalvars.CHARSET, i))
+        #     globalvars.GARBAGE_STRINGS = fuzz_patterns
+        # elif globalvars.GMODE == "mutation":
+        #     known_bad = []
+        #     with open("bad_input", "r") as bad_input_file:
+        #         known_bad.append(bad_input_file.readline)
+        #     # DO MUTATION ON ACQUIRED STRING

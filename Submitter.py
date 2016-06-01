@@ -1,6 +1,7 @@
-"""Sample docstring"""
 import re
 import requests
+
+import globalvars
 
 
 class Submitter(object):
@@ -15,14 +16,12 @@ class Submitter(object):
     cookies = {}
     action = ""
     form_payload = {}
-    print_me = False
 
-    def __init__(self, url, cookies, action, form_payload, print_me):
+    def __init__(self, url, cookies, action, form_payload):
         self.url = url
         self.cookies = cookies
         self.action = action
         self.form_payload = form_payload
-        self.print_me = print_me
 
     def submit(self):
         """
@@ -31,15 +30,22 @@ class Submitter(object):
         request = None
         request_sent = False
         action = self.action.upper()
+        final_url = globalvars.BASE_URL + self.action
+        print(final_url)
+        print(self.cookies)
+        print(self.form_payload)
         if action == "GET":
-            request = requests.get(self.url + self.action, cookies=self.cookies, data=self.form_payload)
+            request = requests.get(final_url, cookies=self.cookies, data=self.form_payload)
             request_sent = True
         elif action == "POST":
-            request = requests.post(self.url + self.action, cookies=self.cookies, data=self.form_payload)
+            request = requests.post(final_url, cookies=self.cookies, data=self.form_payload)
             request_sent = True
+        print(request)
 
-        if self.print_me and request_sent:
+        if request_sent:
             server_error_pattern = re.compile("^5[0-9][0-9]$")
             status_code = str(request.status_code)
             if server_error_pattern.match(status_code):
                 print(status_code + " " + self.url)
+        else:
+            print("Request not sent")

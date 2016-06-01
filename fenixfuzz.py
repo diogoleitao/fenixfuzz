@@ -1,9 +1,9 @@
 """Sample docstring"""
+import string
+import sys
 import random
 import re
 import requests
-import string
-import sys
 
 from bs4 import BeautifulSoup
 
@@ -58,9 +58,11 @@ def parse_input():
             - set the charset used for the fuzz pattern generation;
             - choose the type of user to access FenixEdu: student, teacher or
             system administrator;
+
         Some arguments have default values; so, if they're not specified,
         each option will fall back to its default value. Note however that
         some options must be specified, and thus, don't have default values.
+
         If any errors occur, they are printed out and the main program exits
         with error code 1.
     """
