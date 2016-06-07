@@ -31,16 +31,20 @@ class Submitter(object):
         request_sent = False
         action = self.action.upper()
         final_url = globalvars.BASE_URL + self.action
-        print(final_url)
-        print(self.cookies)
-        print(self.form_payload)
+
+        print("From " + self.url)
+        print("To " + final_url)
+        print("Cookies " + self.cookies)
+        print("Data " + self.form_payload)
+
         if action == "GET":
             request = requests.get(final_url, cookies=self.cookies, data=self.form_payload)
             request_sent = True
         elif action == "POST":
             request = requests.post(final_url, cookies=self.cookies, data=self.form_payload)
             request_sent = True
-        print(request)
+
+        print("Request " + request)
 
         if request_sent:
             server_error_pattern = re.compile("^5[0-9][0-9]$")
@@ -48,4 +52,5 @@ class Submitter(object):
             if server_error_pattern.match(status_code):
                 print(status_code + " " + self.url)
         else:
-            print("Request not sent")
+            pass
+            # print("Request not sent")

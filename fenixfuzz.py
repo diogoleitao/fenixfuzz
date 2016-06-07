@@ -116,7 +116,7 @@ def parse_input():
             except ValueError:
                 errors += "\n\t- Minimum length should be an integer."
         else:
-            print(defaults_warning.format("-m", str(minimum)))
+            print(defaults_warning.format("-m/--minimum", str(minimum)))
 
         if "-M" in sys.argv or "--maximum" in sys.argv:
             try:
@@ -132,7 +132,7 @@ def parse_input():
             except ValueError:
                 errors += "\n\t- Maximum length should be an integer."
         else:
-            print(defaults_warning.format("-M", str(maximum)))
+            print(defaults_warning.format("-M/--maximum", str(maximum)))
 
         if "-g" in sys.argv or "--genmode" in sys.argv:
             try:
@@ -145,7 +145,7 @@ def parse_input():
             else:
                 errors += "\n\t- Generation mode should be generation or mutation."
         else:
-            print(defaults_warning.format("-g", mode))
+            print(defaults_warning.format("-g/--generation", mode))
 
         if "-api" in sys.argv:
             api = True
@@ -159,7 +159,7 @@ def parse_input():
                 except ValueError:
                     errors += "\n\t-Version should be an integer."
             else:
-                print(defaults_warning.format("-v", str(version)))
+                print(defaults_warning.format("-v/--version", str(version)))
         else:
             print(defaults_warning.format("-api", str(api)))
 
@@ -217,13 +217,13 @@ def parse_input():
             print("Error(s):" + errors)
             sys.exit(1)
         else:
-            globalvars.MIN_LENGTH = minimum
-            globalvars.MAX_LENGTH = maximum
-            globalvars.GMODE = mode
+            globalvars.MINIMUM = minimum
+            globalvars.MAXIMUM = maximum
+            globalvars.GENMODE = mode
             globalvars.TEST_API = api
             globalvars.CHARSET = charset
             globalvars.API_VERSION = str(version)
-            globalvars.USER_ROLE = user
+            globalvars.USER = user
 
 
 def fuzz_fenixedu_api(version, fuzz_patterns):
@@ -337,7 +337,7 @@ def _main():
 
     parse_input()
 
-    generate_fuzz_patterns(globalvars.GMODE, globalvars.MIN_LENGTH, globalvars.MAX_LENGTH)
+    generate_fuzz_patterns(globalvars.GENMODE, globalvars.MINIMUM, globalvars.MAXIMUM)
 
     if globalvars.TEST_API:
         fuzz_fenixedu_api(globalvars.API_VERSION, globalvars.GARBAGE_STRINGS)

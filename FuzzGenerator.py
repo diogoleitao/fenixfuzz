@@ -8,7 +8,8 @@ class FuzzGenerator(object):
     """Generator"""
 
     field_types_to_charset = {
-        "text": "char"
+        "text": "char",
+        "email": ""
     }
 
     charsets = {
@@ -44,9 +45,9 @@ class FuzzGenerator(object):
             ranging from min_length to max_length. Each string is made up of a
             subset of characters, based on the charset given as input.
         """
-        if globalvars.GMODE == "generation":
-            maximum = globalvars.MAX_LENGTH
-            minimum = globalvars.MIN_LENGTH
+        if globalvars.GENMODE == "generation":
+            maximum = globalvars.MAXIMUM
+            minimum = globalvars.MINIMUM
 
             if max_length is not None:
                 maximum = max_length
