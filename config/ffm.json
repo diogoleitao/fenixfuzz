@@ -1,5 +1,41 @@
 [
     {
-        "regex rule": "regex for input generation"
+        "studentNumber": ""
+    },
+    {
+        "documentIdNumber": ""
+    },
+    {
+        "email": ""
+    },
+    {
+        "labelToSearch": ""
+    },
+    {
+        "contactEmail": ""
+    },
+    {
+        "fullName": ""
+    },
+    {
+        "dateOfBirthYearMonthDay": ""
+    },
+    {
+        "districtOfBirth": ""
+    },
+    {
+        "districtSubdivisionOfBirth": ""
+    },
+    {
+        "parishOfBirth": ""
+    },
+    {
+        "socialSecurityNumber": ""
+    },
+    {
+        "nameOfFather": ""
+    },
+    {
+        "nameOfMother": ""
     }
 ]

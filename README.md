@@ -5,7 +5,7 @@ FenixFuzz is a software fuzzer for [IST](http://tecnico.ulisboa.pt/)'s FenixEdu 
 1. FenixFuzz logs in through a local instance of [FenixEdu](http://fenixedu.org/) with a given user and crawls every page it can reach;
 2. For each page, retrieves the associated forms and fills them with fuzz patterns, either using generation-based or mutation-based fuzzing (see *Configuring FenixFuzz*);
 3. After filling each form, the fuzzer submits it and prints the result obtained.
-4. (Optional) If specified in the *.properties* file (under *config*), FenixFuzz may also test the FenixEdu's [API](https://fenixedu.org/dev/api/).
+4. (Optional) If specified in the *.properties* file (under *config/*), FenixFuzz may also test the FenixEdu's [API](https://fenixedu.org/dev/api/).
 
 ## Configuring FenixFuzz
 The fuzzer's many properties and settings are configured via the *config/fenixfuzz.properties* file, which should be modified accordingly to each usage. Each one of the file's entries is explained below.

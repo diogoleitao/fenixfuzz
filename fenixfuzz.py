@@ -45,7 +45,7 @@ def dump_results():
     """
         Sample docstring
     """
-    return
+    pass
 
 
 def parse_input():

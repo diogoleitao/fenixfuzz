@@ -8,8 +8,7 @@ class FuzzGenerator(object):
     """Generator"""
 
     field_types_to_charset = {
-        "text": "char",
-        "email": ""
+        "text": "char"
     }
 
     charsets = {
@@ -30,7 +29,7 @@ class FuzzGenerator(object):
     }
 
     def __init__(self):
-        return
+        pass
 
     def generate_strings(self, charset, length):
         """

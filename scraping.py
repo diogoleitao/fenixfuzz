@@ -98,11 +98,14 @@ class FormParser(object):
         html_tree = request.text
         forms = BeautifulSoup(html_tree, "html.parser").find_all("form")
         for form in forms:
+            form_data_payload = {}
             fields = form.find_all("input")
             for field in fields:
-                form_data_payload = self.process_by_field_type(form, field)
+                pair_name_value = self.process_by_field_type(form, field)
+                if pair_name_value is not None:
+                    form_data_payload[pair_name_value[0]] = pair_name_value[1]
 
-            submitter = Submitter(self.url, self.cookies, form.get("action"), form_data_payload)
+            submitter = Submitter(self.url, self.cookies, form.get("action"), form.get("method"), form_data_payload)
             submitter.submit()
             input()
 
@@ -111,23 +114,32 @@ class FormParser(object):
             bla
         """
 
-        form_data_payload = {}
         try:
             field_type = field.get("type")
+            field_name = field.get("name")
+            field_value = field.get("value")
 
             if field_type == "hidden":
-                form_data_payload[field.get("name")] = field.get("value")
+                # print(field_type + " " + field_name)
+                return field_name, field_value
 
             elif field_type == "text":
+                # print(field_type + " " + field_name)
                 try:
-                    if field.get("name") != "j_captcha_response":
-                        fuzz_generator = FuzzGenerator()
-                        fuzz_pattern = fuzz_generator.generate(field_type, field.get("max"), field.get("min"))
+                    if field_name != "j_captcha_response":
+                        # fuzz_generator = FuzzGenerator()
+                        # fuzz_pattern = fuzz_generator.generate(field_type, field.get("max"), field.get("min"))
 
-                        # print("Name " + field.get("name"))
-                        # print("Fuzz " + fuzz_pattern)
-
-                        form_data_payload[field.get("name")] = fuzz_pattern
+                        fuzz_pattern = ""
+                        name = field_name.split(":")
+                        final_name = name[len(name) - 1]
+                        if final_name == "studentNumber":
+                            fuzz_pattern = "SA19"
+                        elif final_name == "documentIdNumber":
+                            fuzz_pattern = "0123456789"
+                        elif final_name == "email":
+                            fuzz_pattern = "mail@ist.utl.pt"
+                        return field_name, fuzz_pattern
 
                 except AttributeError:
                     # Some input attributes are blank or aren"t of type
@@ -136,23 +148,35 @@ class FormParser(object):
                     pass
 
             elif field_type == "radio":
-                radio_options = form.get("input", {"type": "radio"})
-                selected = radio_options[random.choice(radio_options)]
+                # print(field_type + " " + field_name)
+                radio_options = form.find_all("input", {"type": "radio"})
+                selected = radio_options[random.randrange(len(radio_options))]
 
-                form_data_payload[selected.get("name")] = selected.get("value")
+                return selected.get("name"), selected.get("value")
 
             elif field_type == "checkbox":
-                checkboxes = form.get("input", {"type": "checkbox"})
-                selected = checkboxes[random.choice(checkboxes)]
+                # print(field_type + " " + field_name)
+                checkboxes = form.find_all("input", {"type": "checkbox"})
+                selected = checkboxes[random.randrange(len(checkboxes))]
 
                 if selected.has_attr("value"):
-                    form_data_payload[selected.get("name")] = selected.get("value")
+                    return selected.get("name"), selected.get("value")
                 else:
-                    form_data_payload[selected.get("name")] = "on"
+                    return selected.get("name"), "on"
+
+            elif "date" in field_type:
+                # print(field_type + " " + field_name)
+                pass
+
+            elif field_type == "email":
+                # print(field_type + " " + field_name)
+                return field_name, "example@example.com"
+
+            elif field_type == "search":
+                # print(field_type + " " + field_name)
+                pass
 
         except AttributeError:
             # Some input attributes are blank or aren"t of  type "string",
             # which can"t be coerced; so, we just ignore the errors
             pass
-
-        return form_data_payload

@@ -15,12 +15,14 @@ class Submitter(object):
     url = ""
     cookies = {}
     action = ""
+    method = ""
     form_payload = {}
 
-    def __init__(self, url, cookies, action, form_payload):
+    def __init__(self, url, cookies, action, method, form_payload):
         self.url = url
         self.cookies = cookies
         self.action = action
+        self.method = method
         self.form_payload = form_payload
 
     def submit(self):
@@ -29,22 +31,17 @@ class Submitter(object):
         """
         request = None
         request_sent = False
-        action = self.action.upper()
+        method = self.method.upper()
         final_url = globalvars.BASE_URL + self.action
 
-        print("From " + self.url)
-        print("To " + final_url)
-        print("Cookies " + self.cookies)
-        print("Data " + self.form_payload)
-
-        if action == "GET":
+        if method == "GET":
             request = requests.get(final_url, cookies=self.cookies, data=self.form_payload)
             request_sent = True
-        elif action == "POST":
+        elif method == "POST":
             request = requests.post(final_url, cookies=self.cookies, data=self.form_payload)
             request_sent = True
 
-        print("Request " + request)
+        print(request)
 
         if request_sent:
             server_error_pattern = re.compile("^5[0-9][0-9]$")
