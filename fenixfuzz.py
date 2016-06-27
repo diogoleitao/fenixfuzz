@@ -1,4 +1,5 @@
 """Sample docstring"""
+import json
 import string
 import sys
 import random
@@ -9,6 +10,10 @@ from bs4 import BeautifulSoup
 
 import globalvars
 from scraping import LinkCrawler, FormParser
+
+
+def json_prettifier(obj):
+    return json.dumps(json.loads(obj), indent=4, separators=(',', ': '))
 
 
 def generate_strings(charset, length):
@@ -31,7 +36,7 @@ def generate_fuzz_patterns(mode, minimum, maximum):
         fuzz_patterns = []
         for i in range(minimum, maximum + 1):
             fuzz_patterns.append(generate_strings(globalvars.CHARSET, i))
-        globalvars.GARBAGE_STRINGS = fuzz_patterns
+        globalvars.FUZZ_PATTERNS = fuzz_patterns
     elif mode == "mutation":
         known_bad = []
         with open("bad_input", "r") as bad_input_file:
@@ -315,7 +320,7 @@ def fuzz_fenixedu(role):
 
     login(role)
 
-    home_url = globalvars.BASE_URL + "/starfleet/home.do"
+    home_url = globalvars.LOCAL_CONTEXT_PATH + "/home.do"
     crawler_populate = LinkCrawler(home_url, globalvars.COOKIES)
     crawler_populate.crawl()
 
@@ -342,9 +347,10 @@ def _main():
     if globalvars.TEST_API:
         fuzz_fenixedu_api(globalvars.API_VERSION, globalvars.GARBAGE_STRINGS)
 
-    # fuzz_fenixedu(globalvars.USER_ROLE)
+    fuzz_fenixedu(globalvars.USER)
 
     dump_results()
+
 
 if __name__ == '__main__':
     _main()

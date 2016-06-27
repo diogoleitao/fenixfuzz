@@ -10,7 +10,6 @@ from bs4 import BeautifulSoup
 
 import globalvars
 from Submitter import Submitter
-from FuzzGenerator import FuzzGenerator
 
 
 class LinkCrawler(object):
@@ -19,7 +18,7 @@ class LinkCrawler(object):
     """
     url = ""
     cookies = {}
-    exclude_patterns = ["/logout", "/downloadFile"]
+    exclude_patterns = []
 
     def __init__(self, url, cookies):
         self.cookies = cookies
@@ -28,8 +27,9 @@ class LinkCrawler(object):
             self.url = globalvars.BASE_URL + url
         else:
             self.url = url
+        # print("LC " + self.url)
 
-        with open("config/exclude.json", "r") as exclude_patterns_file:
+        with open(globalvars.EXCLUDE_URLS_FILE, "r") as exclude_patterns_file:
             self.exclude_patterns = json.loads(exclude_patterns_file.read())
 
     def filter_url(self):
@@ -57,13 +57,14 @@ class LinkCrawler(object):
             request = requests.get(self.url, cookies=self.cookies)
             html_tree = request.text
             anchors = BeautifulSoup(html_tree, "html.parser").find_all("a")
+
             for anchor in anchors:
                 href = anchor.get("href")
+
                 try:
                     # Only save same domain links
                     if href.startswith(globalvars.COOKIES["contextPath"]) or href.startswith(globalvars.BASE_URL):
                         if href not in globalvars.CRAWLED_LINKS_QUEUE:
-                            # print "\t" + href
                             globalvars.CRAWLED_LINKS_QUEUE.append(href)
                             globalvars.LINKS_QUEUE.append(href)
 
@@ -88,6 +89,8 @@ class FormParser(object):
             self.url = url
         self.cookies = cookies
 
+        print("FP " + self.url)
+
     def parse(self):
         """
             Finds all forms present in the page returned by the GET request,
@@ -97,17 +100,19 @@ class FormParser(object):
         request = requests.get(self.url, cookies=self.cookies)
         html_tree = request.text
         forms = BeautifulSoup(html_tree, "html.parser").find_all("form")
+
         for form in forms:
             form_data_payload = {}
             fields = form.find_all("input")
+
             for field in fields:
                 pair_name_value = self.process_by_field_type(form, field)
+
                 if pair_name_value is not None:
                     form_data_payload[pair_name_value[0]] = pair_name_value[1]
 
             submitter = Submitter(self.url, self.cookies, form.get("action"), form.get("method"), form_data_payload)
             submitter.submit()
-            input()
 
     def process_by_field_type(self, form, field):
         """
@@ -127,14 +132,13 @@ class FormParser(object):
                 # print(field_type + " " + field_name)
                 try:
                     if field_name != "j_captcha_response":
-                        # fuzz_generator = FuzzGenerator()
-                        # fuzz_pattern = fuzz_generator.generate(field_type, field.get("max"), field.get("min"))
-
                         fuzz_pattern = ""
+
                         name = field_name.split(":")
                         final_name = name[len(name) - 1]
+
                         if final_name == "studentNumber":
-                            fuzz_pattern = "SA19"
+                            fuzz_pattern = "19"
                         elif final_name == "documentIdNumber":
                             fuzz_pattern = "0123456789"
                         elif final_name == "email":

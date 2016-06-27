@@ -19,9 +19,9 @@ The fuzzer's many properties and settings are configured via the *config/fenixfu
 
     genmode = generation
 
-*test_api*: if its value is [Y]es, then the FenixEdu's API is tested as well. If it's [N]o, then only the web platform is fuzzed.
+*test_api*: if its value is [y]es, then the FenixEdu's API is tested as well. If it's [n]o, then only the web platform is fuzzed.
 
-    test_api = Y
+    test_api = y
 
 *charset*:  TBD
 
@@ -33,12 +33,12 @@ The fuzzer's many properties and settings are configured via the *config/fenixfu
 
 *exclude_urls*: TBD
 
-    exclude_urls = exclude.json
+    exclude_urls = config/exclude.json
 
 *fenixfuzz_model*: TBD
 
-    fenixfuzz_model = ffm.json
+    fenixfuzz_model = config/ffm.json
 
 *local_context_path*: TBD
 
-    local_context_path = fenix
+    local_context_path = http://localhost:8080/fenix

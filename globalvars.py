@@ -39,11 +39,11 @@ LINKS_QUEUE = deque([])
 CRAWLED_LINKS_QUEUE = deque([])
 # Cookies' dictionary, sent in every request
 COOKIES = {}
-# Local Fenix instance URL
-BASE_URL = "http://localhost:8080"
 # List of generated fuzz patterns
-GARBAGE_STRINGS = []
+FUZZ_PATTERNS = []
 # Number of threads to crawl "parallel"
-N_THREADS_CRAWLER = 1
+CRAWLER_THREADS = 1
 # Number of threads to execute "parallel" requests
-N_THREADS_REQUESTS = 1
+REQUESTS_THREADS = 1
+#
+BASE_URL = "http://localhost:8080"
