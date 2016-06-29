@@ -23,11 +23,11 @@ The fuzzer's many properties and settings are configured via the *config/fenixfu
 
     test_api = y
 
-*charset*:  TBD
+*charset*:  the charset to be used when the *fenixfuzz_model* file has no rules at all. This acts as a fallback value or as a starting point for fields that are not covered by the rules in the JSON file. Accepted values are *all* (whitespace characters, alphanumeric and punctuation), *no-white*, *alpha*, *char* and *num*.
 
     charset = alpha
 
-*user*: the user ID used to login to the application. Different types of users will allow the fuzzer to crawl different parts of FenixEdu.
+*user*: the user ID used to log in the application. Different types of users will allow the fuzzer to crawl different parts of FenixEdu, thus testing fewer or more of its forms.
 
     user = ist123456
 
