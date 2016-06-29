@@ -14,8 +14,13 @@ from Submitter import Submitter
 
 class LinkCrawler(object):
     """
-        bla
+        Responsible for crawling FenixEdu, by performing a GET request for each
+        link that is found. Each instance gets a link, crawls it and adds the
+        new links to the queue. Two queues are used (stored in globalvars):
+        - LINKS_QUEUE for adding links that have not yet been visited and
+        - CRAWLED_LINKS_QUEUE for storing links that have already been visited.
     """
+
     url = ""
     cookies = {}
     exclude_patterns = []
@@ -33,10 +38,8 @@ class LinkCrawler(object):
 
     def filter_url(self):
         """
-            Checks if the url has only printable characters or if it contains
-            a specific pattern. These patterns should be avoided, because
-            the associated GET requests that may be performed have results
-            that compromise the tool's flow.
+            Checks if the url has only Python's printable characters or if it
+            matches a specific pattern.
         """
 
         has_strange_characters = not all(char in string.printable for char in self.url)
@@ -46,10 +49,11 @@ class LinkCrawler(object):
 
     def crawl(self):
         """
-            Crawls the page returned by the GET request performed on the
-            instance's url, looking for all the links the page has and adds each
-            link if it's not present in the CRAWLED_LINKS_QUEUE global variable
+            Crawls the page returned by the GET request, looking for all the
+            links the page has, adding to the queue if they weren't already
+            visited.
         """
+
         filtered = self.filter_url()
 
         if filtered:
@@ -76,7 +80,10 @@ class LinkCrawler(object):
 
 class FormParser(object):
     """
-        bla
+        Responsible for parsing all forms, by analysing the fields, filling
+        them and submitting the form (via the Submitter class). Each instance
+        gets a link, retrieves the page, finds its forms and fills the fields
+        with the appropriate input (that is, the generated fuzz pattern).
     """
     url = ""
     cookies = {}
@@ -90,8 +97,8 @@ class FormParser(object):
 
     def parse(self):
         """
-            Finds all forms present in the page returned by the GET request,
-            processes its fields and submits the form to the proper URL
+            Finds all forms in the page processes and fills each field by type
+            and submits the form to the proper URL (via the Submitter class)
         """
 
         request = requests.get(self.url, cookies=self.cookies)
@@ -143,8 +150,8 @@ class FormParser(object):
                         return field_name, fuzz_pattern
 
                 except AttributeError:
-                    # Some input attributes are blank or aren"t of type
-                    # "string", which can"t be coerced; so, we just ignore
+                    # Some input attributes are blank or aren't of type
+                    # 'string', which can't be coerced; so, we just ignore
                     # the errors
                     pass
 
@@ -178,6 +185,6 @@ class FormParser(object):
                 pass
 
         except AttributeError:
-            # Some input attributes are blank or aren"t of  type "string",
-            # which can"t be coerced; so, we just ignore the errors
+            # Some input attributes are blank or aren't of  type 'string',
+            # which can't be coerced; so, we just ignore the errors
             pass

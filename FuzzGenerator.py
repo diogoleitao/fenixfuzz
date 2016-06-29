@@ -5,7 +5,9 @@ import globalvars
 
 
 class FuzzGenerator(object):
-    """Generator"""
+    """
+        Generator
+    """
 
     field_types_to_charset = {
         "text": "char"
