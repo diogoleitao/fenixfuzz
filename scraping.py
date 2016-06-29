@@ -27,7 +27,6 @@ class LinkCrawler(object):
             self.url = globalvars.BASE_URL + url
         else:
             self.url = url
-        # print("LC " + self.url)
 
         with open(globalvars.EXCLUDE_URLS_FILE, "r") as exclude_patterns_file:
             self.exclude_patterns = json.loads(exclude_patterns_file.read())
@@ -37,7 +36,7 @@ class LinkCrawler(object):
             Checks if the url has only printable characters or if it contains
             a specific pattern. These patterns should be avoided, because
             the associated GET requests that may be performed have results
-            that compromise the tool"s flow.
+            that compromise the tool's flow.
         """
 
         has_strange_characters = not all(char in string.printable for char in self.url)
@@ -48,8 +47,8 @@ class LinkCrawler(object):
     def crawl(self):
         """
             Crawls the page returned by the GET request performed on the
-            instance"s url, looking for all the links the page has and adds each
-            link if it"s not present in the CRAWLED_LINKS_QUEUE global variable
+            instance's url, looking for all the links the page has and adds each
+            link if it's not present in the CRAWLED_LINKS_QUEUE global variable
         """
         filtered = self.filter_url()
 
@@ -69,8 +68,8 @@ class LinkCrawler(object):
                             globalvars.LINKS_QUEUE.append(href)
 
                 except AttributeError:
-                    # Some of the href attributes are blank or aren"t of type
-                    # "string", which can"t be coerced; so, we just ignore
+                    # Some of the href attributes are blank or aren't of type
+                    # 'string', which can't be coerced; so, we just ignore
                     # the errors
                     continue
 
@@ -89,8 +88,6 @@ class FormParser(object):
             self.url = url
         self.cookies = cookies
 
-        print("FP " + self.url)
-
     def parse(self):
         """
             Finds all forms present in the page returned by the GET request,
@@ -106,7 +103,7 @@ class FormParser(object):
             fields = form.find_all("input")
 
             for field in fields:
-                pair_name_value = self.process_by_field_type(form, field)
+                pair_name_value = self.process_field_by_type(form, field)
 
                 if pair_name_value is not None:
                     form_data_payload[pair_name_value[0]] = pair_name_value[1]
@@ -114,7 +111,7 @@ class FormParser(object):
             submitter = Submitter(self.url, self.cookies, form.get("action"), form.get("method"), form_data_payload)
             submitter.submit()
 
-    def process_by_field_type(self, form, field):
+    def process_field_by_type(self, form, field):
         """
             bla
         """
