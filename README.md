@@ -15,30 +15,30 @@ The fuzzer's many properties and settings are configured via the *config/fenixfu
     minimum = 1
     maximum = 20
 
-*genmode*: it specifies how the fuzz patterns are generated. Generation-based fuzzing consists of constructing a string from a set of characters (for example) and discarding the string used. Mutation-based fuzzing starts from a known-good input, mutates and reuses it (after sending it to the target application) if the result obtained (from the submission) respects a certain heuristic. Accepted values are either *generation* or *mutation*.
+__*genmode*__: it specifies how the fuzz patterns are generated. Generation-based fuzzing consists of constructing a string from a set of characters (for example) and discarding the string used. Mutation-based fuzzing starts from a known-good input, mutates and reuses it (after sending it to the target application) if the result obtained (from the submission) respects a certain heuristic. Accepted values are either *generation* or *mutation*.
 
     genmode = generation
 
-*test_api*: if the value is [y]es, then the FenixEdu's API is tested. If it's [n]o, then only the web platform is fuzzed.
+__*test_api*__: if the value is [y]es, then the FenixEdu's API is tested. If it's [n]o, then only the web platform is fuzzed.
 
     test_api = y
 
-*charset*:  the charset to be used when the *fenixfuzz_model* file has no rules at all. This acts as a fallback value or as a starting point for fields that are not covered by the rules in the JSON file. Accepted values are *all* (whitespace characters, alphanumeric and punctuation), *no-white*, *alpha*, *char* and *num*.
+__*charset*__:  the charset to be used when the *fenixfuzz_model* file has no rules at all. This acts as a fallback value or as a starting point for fields that are not covered by the rules in the JSON file. Accepted values are *all* (whitespace characters, alphanumeric and punctuation), *no-white*, *alpha*, *char* and *num*.
 
     charset = alpha
 
-*user*: the user ID used to log in the application. Different types of users will allow the fuzzer to crawl different parts of FenixEdu, thus testing fewer or more of its forms.
+__*user*__: the user ID used to log in the application. Different types of users will allow the fuzzer to crawl different parts of FenixEdu, thus testing fewer or more of its forms.
 
     user = ist123456
 
-*exclude_urls*: a JSON file containing a list of all the URLs that should be ignored during the crawling phase. This is to prevent the fuzzer from crawling URLs that may invalidate the current cookie data (logout procedures or similar), file URLs (such as PDFs) or links which provide the same type of information (e.g., room scheduling). The latter will be checked by analyzing a sample of said links to deduce the overall outcome.
+__*exclude_urls*__: a JSON file containing a list of all the URLs that should be ignored during the crawling phase. This is to prevent the fuzzer from crawling URLs that may invalidate the current cookie data (logout procedures or similar), file URLs (such as PDFs) or links which provide the same type of information (e.g., room scheduling). The latter will be checked by analyzing a sample of said links to deduce the overall outcome.
 
     exclude_urls = config/exclude.json
 
-*fenixfuzz_model*: a JSON file containing a set of rules (regular expressions, or similar) which describes what is to be generated when a certain pattern of field name is found. For example, if a field's name is *email*, then a possible rule for it could be *[a-zA-Z]+\@ist.utl.pt*".
+__*fenixfuzz_model*__: a JSON file containing a set of rules (regular expressions, or similar) which describes what is to be generated when a certain pattern of field name is found. For example, if a field's name is *email*, then a possible rule for it could be *[a-zA-Z]+\@ist.utl.pt*".
 
     fenixfuzz_model = config/ffm.json
 
-*local_instance*: the URL of the local running instance.
+***local_instance***: the URL of the local running instance.
 
     local_instance = http://localhost:8080/fenix
