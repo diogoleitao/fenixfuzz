@@ -1,14 +1,13 @@
 """
-    Since Python only allows variables to be defined and not declared,
-    all of them are assigned a "default" value.However, that does not reflect
-    their final value (that is, the value assigned when the script is
-    running).
+    Since Python only allows variables to be defined and not declared, all of
+    them are assigned Ptyhon's None value. However, that does not reflect their
+    final value (that is, the value assigned when the script is running).
 """
 from collections import deque
 
-######################################################################
-# VARIABLES WHOSE VALUES ARE READ FROM THE FENIXFUZZ.PROPERTIES FILE #
-######################################################################
+##################################################################
+# VARIABLES READ (OR DERIVED) FROM THE FENIXFUZZ.PROPERTIES FILE #
+##################################################################
 # Minimum fuzz pattern string length
 MINIMUM = None
 # Maximum fuzz pattern string length
@@ -29,6 +28,12 @@ EXCLUDE_URLS_FILE = None
 FENIXFUZZ_MODEL_FILE = None
 # Local instance context path
 LOCAL_CONTEXT_PATH = None
+#
+START_PAGE = None
+#
+LOGIN_ENDPOINT = None
+#
+BASE_URL = None
 
 
 # Queue containing all the forms acquired after crawling
@@ -45,5 +50,3 @@ FUZZ_PATTERNS = []
 CRAWLER_THREADS = 1
 # Number of threads to execute "parallel" requests
 REQUESTS_THREADS = 1
-#
-BASE_URL = "http://localhost:8080"

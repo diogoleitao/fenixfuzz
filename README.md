@@ -4,8 +4,8 @@ FenixFuzz is a software fuzzer for [IST](http://tecnico.ulisboa.pt/)'s FenixEdu 
 ## Overview
 1. FenixFuzz logs in through a local instance of [FenixEdu](http://fenixedu.org/) with a given user and crawls every page it can reach;
 2. For each page, retrieves its forms and fills them with fuzz patterns, either using generation-based or mutation-based fuzzing (see *Configuring FenixFuzz*);
-3. After filling each form, the fuzzer submits it and prints the result obtained.
-4. (Optional) If specified in the *.properties* file (under *config/*), FenixFuzz also tests the FenixEdu's [API](https://fenixedu.org/dev/api/).
+3. After filling each form, the fuzzer submits it and saves the result.
+4. Once it goes through all the forms that were found, the results are printed.
 
 ## Configuring FenixFuzz
 The fuzzer's many properties and settings are configured via the *config/fenixfuzz.properties* file, which should be modified accordingly to each usage. Each one of the file's entries is explained below.
@@ -14,14 +14,6 @@ The fuzzer's many properties and settings are configured via the *config/fenixfu
 
     minimum = 1
     maximum = 20
-
-__*genmode*__: it specifies how the fuzz patterns are generated. Generation-based fuzzing will use the *fenixfuzz_model* as a starting point; mutation-based fuzzing will start from a known good input (that is, one that is accepted) and mutate and reuse it as long as it produces good results (this is measured by heuristics). Accepted values are either *generation* or *mutation*.
-
-    genmode = generation
-
-__*test_api*__: if the value is [y]es, then the FenixEdu's API is tested. If it's [n]o, then only the web platform is fuzzed.
-
-    test_api = y
 
 __*charset*__:  the charset to be used when the *fenixfuzz_model* file has no rules at all. This acts as a fallback value or as a starting point for fields that are not covered by the rules in the JSON file. Accepted values are *all* (Python's printable characters), *no-white*, *alpha*, *char* and *num*.
 
@@ -42,3 +34,11 @@ __*fenixfuzz_model*__: a JSON file containing a set of rules (regular expression
 __*local_instance*__: the URL of the local running instance.
 
     local_instance = http://localhost:8080/fenix
+
+__*start_page*__: TBD
+
+    start_page = /home.do
+
+__*login_endpoint*__: TBD
+
+    login_endpoint = /api/bennu-core/profile/login

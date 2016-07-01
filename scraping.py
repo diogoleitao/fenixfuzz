@@ -23,7 +23,7 @@ class LinkCrawler(object):
 
     url = ""
     cookies = {}
-    exclude_patterns = []
+    exclude_patterns = ["/downloadFile", "/logout"]
 
     def __init__(self, url, cookies):
         self.cookies = cookies
@@ -34,7 +34,7 @@ class LinkCrawler(object):
             self.url = url
 
         with open(globalvars.EXCLUDE_URLS_FILE, "r") as exclude_patterns_file:
-            self.exclude_patterns = json.loads(exclude_patterns_file.read())
+            self.exclude_patterns += json.loads(exclude_patterns_file.read())
 
     def filter_url(self):
         """
@@ -66,7 +66,12 @@ class LinkCrawler(object):
 
                 try:
                     # Only save same domain links
-                    if href.startswith(globalvars.COOKIES["contextPath"]) or href.startswith(globalvars.BASE_URL):
+                    if href.startswith(globalvars.LOCAL_CONTEXT_PATH):
+                        if href not in globalvars.CRAWLED_LINKS_QUEUE:
+                            globalvars.CRAWLED_LINKS_QUEUE.append(href)
+                            globalvars.LINKS_QUEUE.append(href)
+
+                    elif href.startswith(globalvars.BASE_URL):
                         if href not in globalvars.CRAWLED_LINKS_QUEUE:
                             globalvars.CRAWLED_LINKS_QUEUE.append(href)
                             globalvars.LINKS_QUEUE.append(href)
@@ -110,10 +115,10 @@ class FormParser(object):
             fields = form.find_all("input")
 
             for field in fields:
-                pair_name_value = self.process_field_by_type(form, field)
+                name_value_pair = self.process_field_by_type(form, field)
 
-                if pair_name_value is not None:
-                    form_data_payload[pair_name_value[0]] = pair_name_value[1]
+                if name_value_pair is not None:
+                    form_data_payload[name_value_pair[0]] = name_value_pair[1]
 
             submitter = Submitter(self.url, self.cookies, form.get("action"), form.get("method"), form_data_payload)
             submitter.submit()

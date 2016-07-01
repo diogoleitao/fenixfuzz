@@ -10,15 +10,20 @@ from utils import terminate, read_properties_file
 # The help message to be displayed. It is "oddly" formatted so it is easier to
 # see how the final product will look (instead of using \t and \n characters
 # to align everything).
-HELP_MESSAGE = "\
+HELP_TEXT = "\
 USAGE:\n\
         parser.py [OPTIONS]\n\n\
 OPTIONS:\n\
 -f, --file:\n\
         Path to the .properties file needed to configure the fuzzer.\n\
         Example: '/path/to/fenixfuzz.properties'.\n\n\
+-l, --url:\n\
+        Override starting URL. Useful when one wants to test a specific page.\n\
+        Example: '/page.do'.\n\
 -h, --help:\n\
         Shows this text."
+
+HELP_MESSAGE = "Please check that a value was correctly specified for the {0} option."
 
 
 def _main():
@@ -27,7 +32,16 @@ def _main():
     """
 
     if "-h" in sys.argv or "--help" in sys.argv:
-        terminate(HELP_MESSAGE, 0)
+        terminate(HELP_TEXT, 0)
+    elif "-l" in sys.argv or "--url" in sys.argv:
+        try:
+            url_index = sys.argv.index("-l") + 1
+        except ValueError:
+            url_index = sys.argv.index("--url") + 1
+        try:
+            globalvars.START_PAGE = sys.argv[url_index]
+        except IndexError:
+            terminate(HELP_MESSAGE.format("-l/--url"), 1)
     elif "-f" in sys.argv or "--file" in sys.argv:
         try:
             path_index = sys.argv.index("-f") + 1
@@ -36,7 +50,7 @@ def _main():
         try:
             path = sys.argv[path_index]
         except IndexError:
-            terminate("Please check that a value was specified for the -f/--file option.", 1)
+            terminate(HELP_MESSAGE.format("-f/--file"), 1)
     else:
         terminate("-f/--file option not specified", 1)
 
@@ -44,7 +58,6 @@ def _main():
 
     globalvars.MINIMUM = properties["minimum"]
     globalvars.MAXIMUM = properties["maximum"]
-    globalvars.GENMODE = properties["genmode"]
     globalvars.TEST_API = properties["test_api"]
     globalvars.API_VERSION = properties["api_version"]
     globalvars.CHARSET = properties["charset"]
@@ -61,7 +74,11 @@ def _main():
         path_array = path_array[:-1]
     globalvars.LOCAL_CONTEXT_PATH = path_array.path
 
-    login_url = globalvars.BASE_URL + globalvars.LOCAL_CONTEXT_PATH + "/api/bennu-core/profile/login"
+    if globalvars.START_PAGE is None:
+        globalvars.START_PAGE = properties["login_page"]
+    globalvars.LOGIN_ENDPOINT = properties["login_endpoint"]
+
+    login_url = globalvars.BASE_URL + globalvars.LOCAL_CONTEXT_PATH + globalvars.LOGIN_ENDPOINT
     login_data = {
         "username": globalvars.USER,
         "password": ""
@@ -79,7 +96,7 @@ def _main():
         "contextPath": context_path
     }
 
-    home_url = globalvars.BASE_URL + globalvars.LOCAL_CONTEXT_PATH + "/home.do"
+    home_url = globalvars.BASE_URL + globalvars.LOCAL_CONTEXT_PATH + globalvars.START_PAGE
     globalvars.LINKS_QUEUE.append(home_url)
 
     populate = LinkCrawler(globalvars.LINKS_QUEUE.popleft(), globalvars.COOKIES)
