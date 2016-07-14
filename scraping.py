@@ -9,7 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 
 import globalvars
-from Submitter import Submitter
+from submitter import Submitter
 
 
 class LinkCrawler(object):
@@ -21,12 +21,9 @@ class LinkCrawler(object):
         - CRAWLED_LINKS_QUEUE for storing links that have already been visited.
     """
 
-    url = ""
-    cookies = {}
-    exclude_patterns = ["/downloadFile", "/logout"]
-
     def __init__(self, url, cookies):
         self.cookies = cookies
+        self.exclude_patterns = ["/downloadFile", "/logout"]
 
         if url.startswith("/"):
             self.url = globalvars.BASE_URL + url
@@ -62,25 +59,27 @@ class LinkCrawler(object):
             anchors = BeautifulSoup(html_tree, "html.parser").find_all("a")
 
             for anchor in anchors:
-                href = anchor.get("href")
-
                 try:
+                    href = anchor.get("href")
+
                     # Only save same domain links
                     if href.startswith(globalvars.LOCAL_CONTEXT_PATH):
                         if href not in globalvars.CRAWLED_LINKS_QUEUE:
                             globalvars.CRAWLED_LINKS_QUEUE.append(href)
-                            globalvars.LINKS_QUEUE.append(href)
+                            globalvars.LINKS_QUEUE.put(href)
 
                     elif href.startswith(globalvars.BASE_URL):
                         if href not in globalvars.CRAWLED_LINKS_QUEUE:
                             globalvars.CRAWLED_LINKS_QUEUE.append(href)
-                            globalvars.LINKS_QUEUE.append(href)
+                            globalvars.LINKS_QUEUE.put(href)
 
                 except AttributeError:
                     # Some of the href attributes are blank or aren't of type
                     # 'string', which can't be coerced; so, we just ignore
                     # the errors
                     continue
+
+        globalvars.LINKS_QUEUE.task_done()
 
 
 class FormParser(object):
@@ -90,8 +89,6 @@ class FormParser(object):
         gets a link, retrieves the page, finds its forms and fills the fields
         with the appropriate input (that is, the generated fuzz pattern).
     """
-    url = ""
-    cookies = {}
 
     def __init__(self, url, cookies):
         if url.startswith("/"):

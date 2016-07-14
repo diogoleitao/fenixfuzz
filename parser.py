@@ -1,5 +1,6 @@
 import sys
 from urllib.parse import urlparse
+import threading
 import requests
 
 import globalvars
@@ -12,14 +13,18 @@ from utils import terminate, read_properties_file
 # to align everything).
 HELP_TEXT = "\
 USAGE:\n\
-        parser.py [OPTIONS]\n\n\
+        parser.py -f [FILE] [OPTIONS]\n\n\
 OPTIONS:\n\
 -f, --file:\n\
         Path to the .properties file needed to configure the fuzzer.\n\
-        Example: '/path/to/fenixfuzz.properties'.\n\n\
+        Example: /path/to/fenixfuzz.properties.\n\n\
 -l, --url:\n\
-        Override starting URL. Useful when one wants to test a specific page.\n\
-        Example: '/page.do'.\n\
+        Override starting URL. Useful when one wants to test a specific page and that page only.\n\
+        Example: /page.do.\n\n\
+-i, --iter:\n\
+        How many times the tool will fuzz Fenix, by reusing the inputs with the best results.\n\
+        Defaults to 1 if not specified.\n\
+        Example: 2.\n\n\
 -h, --help:\n\
         Shows this text."
 
@@ -42,6 +47,15 @@ def _main():
             globalvars.START_PAGE = sys.argv[url_index]
         except IndexError:
             terminate(HELP_MESSAGE.format("-l/--url"), 1)
+    elif "-i" in sys.argv or "--iter" in sys.argv:
+        try:
+            iter_index = sys.argv.index("-i") + 1
+        except ValueError:
+            iter_index = sys.argv.index("--iter") + 1
+        try:
+            globalvars.ITERATIONS = sys.argv[iter_index]
+        except IndexError:
+            terminate(HELP_MESSAGE.format("-i/--iter"), 1)
     elif "-f" in sys.argv or "--file" in sys.argv:
         try:
             path_index = sys.argv.index("-f") + 1
@@ -66,16 +80,15 @@ def _main():
     globalvars.FENIXFUZZ_MODEL_FILE = properties["fenixfuzz_model"]
 
     path_array = urlparse(properties["local_instance"])
-    protocol = path_array.scheme
-    host = path_array.netloc
 
-    globalvars.BASE_URL = protocol + '://' + host
+    globalvars.BASE_URL = path_array.scheme + '://' + path_array.netloc
     if path_array.path.endswith("/"):
         path_array = path_array[:-1]
     globalvars.LOCAL_CONTEXT_PATH = path_array.path
 
     if globalvars.START_PAGE is None:
         globalvars.START_PAGE = properties["login_page"]
+
     globalvars.LOGIN_ENDPOINT = properties["login_endpoint"]
 
     login_url = globalvars.BASE_URL + globalvars.LOCAL_CONTEXT_PATH + globalvars.LOGIN_ENDPOINT
@@ -88,29 +101,26 @@ def _main():
     cookies = response.headers.get("set-cookie")
     cookies = cookies.replace(";", "").replace(",", "").split(" ")
 
-    context_path = cookies[0].split("=")[1]
-    jsessionid = cookies[2].split("=")[1]
-
     globalvars.COOKIES = {
-        "JSESSIONID": jsessionid,
-        "contextPath": context_path
+        "JSESSIONID": cookies[0].split("=")[1],
+        "contextPath": cookies[2].split("=")[1]
     }
 
-    home_url = globalvars.BASE_URL + globalvars.LOCAL_CONTEXT_PATH + globalvars.START_PAGE
-    globalvars.LINKS_QUEUE.append(home_url)
-
-    populate = LinkCrawler(globalvars.LINKS_QUEUE.popleft(), globalvars.COOKIES)
+    populate = LinkCrawler(globalvars.BASE_URL + globalvars.LOCAL_CONTEXT_PATH + globalvars.START_PAGE, globalvars.COOKIES)
     populate.crawl()
 
-    while globalvars.LINKS_QUEUE:
-        url = globalvars.LINKS_QUEUE.popleft()
+    crawler_threads = []
+    for i in range(globalvars.CRAWLER_THREADS):
+        url = globalvars.LINKS_QUEUE.get()
         link_crawler = LinkCrawler(url, globalvars.COOKIES)
-        link_crawler.crawl()
+        crawler_thread = threading.Thread(target=link_crawler.crawl)
+        crawler_threads.append(crawler_thread)
+        crawler_thread.start()
 
-    if 1 == 1:
-        return
+    for thread in crawler_threads:
+        thread.join()
 
-    while globalvars.CRAWLED_LINKS_QUEUE:
+    for i in range(len(globalvars.CRAWLED_LINKS_QUEUE)):
         url = globalvars.CRAWLED_LINKS_QUEUE.popleft()
         form_parser = FormParser(url, globalvars.COOKIES)
         form_parser.parse()

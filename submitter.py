@@ -1,6 +1,5 @@
+import re
 import requests
-
-from bs4 import BeautifulSoup
 
 import globalvars
 from utils import printf
@@ -13,12 +12,6 @@ class Submitter(object):
         improve this tool's performance, this responsability was put into this
         module so that the submit() method can be parallelized with threads.
     """
-
-    url = ""
-    cookies = {}
-    action = ""
-    method = ""
-    form_payload = {}
 
     def __init__(self, url, cookies, action, method, form_payload):
         self.url = url
@@ -48,14 +41,10 @@ class Submitter(object):
         self.check_request(request)
 
     def check_request(self, request):
-        """
-            server_error_pattern = re.compile("^5[0-9][0-9]$")
-            status_code = str(request.status_code)
-            if server_error_pattern.match(status_code):
-                pass
-                print(status_code + " " + self.url)
-
-        """
+        server_error_pattern = re.compile("^5[0-9][0-9]$")
+        status_code = str(request.status_code)
+        if server_error_pattern.match(status_code):
+            print(status_code + " " + self.url)
 
         # html_tree = request.text
         # css_error_classes = ["has-error", "error0", "help-block"]

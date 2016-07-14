@@ -26,9 +26,6 @@ class FuzzGenerator(object):
         "num": string.digits
     }
 
-    def __init__(self):
-        pass
-
     def generate_strings(self, charset, length):
         """
             Returns a string with a given length containing a subset of

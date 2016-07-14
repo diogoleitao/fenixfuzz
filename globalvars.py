@@ -3,6 +3,7 @@
     them are assigned Ptyhon's None value. However, that does not reflect their
     final value (that is, the value assigned when the script is running).
 """
+from queue import Queue
 from collections import deque
 
 ##################################################################
@@ -34,12 +35,14 @@ START_PAGE = None
 LOGIN_ENDPOINT = None
 #
 BASE_URL = None
+#
+ITERATIONS = None
 
 
 # Queue containing all the forms acquired after crawling
-FORMS_QUEUE = deque([])
+FORMS_QUEUE = Queue()
 # Queue used for crawling FenixEdu and saving all the links found in a given webpage
-LINKS_QUEUE = deque([])
+LINKS_QUEUE = Queue()
 # Queue containing all found links (no duplicates)
 CRAWLED_LINKS_QUEUE = deque([])
 # Cookies' dictionary, sent in every request
