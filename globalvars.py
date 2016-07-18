@@ -1,8 +1,8 @@
 """
     Since Python only allows variables to be defined and not declared, all of
-    them are assigned Ptyhon's None value. However, that does not reflect their
-    final value (that is, the value assigned when the script is running).
+    them are assigned Python's None value (only the first batch).
 """
+
 from queue import Queue
 from collections import deque
 
@@ -13,12 +13,6 @@ from collections import deque
 MINIMUM = None
 # Maximum fuzz pattern string length
 MAXIMUM = None
-# Fuzz pattern generation mode
-GENMODE = None
-# If True, tests FenixEdu API
-TEST_API = None
-# API version (only used if test_api is specified, to build the request URL)
-API_VERSION = None
 # Charset command line option
 CHARSET = None
 # User role to perform login

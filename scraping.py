@@ -1,6 +1,7 @@
 """
     FenixEdu web scraping utility classes
 """
+
 import string
 import json
 import random
@@ -79,7 +80,7 @@ class LinkCrawler(object):
                     # the errors
                     continue
 
-        globalvars.LINKS_QUEUE.task_done()
+        # globalvars.LINKS_QUEUE.task_done()
 
 
 class FormParser(object):
