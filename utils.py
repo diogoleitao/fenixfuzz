@@ -20,13 +20,13 @@ OPTIONS:\n\
         Override starting URL, to test a specific page.\n\
         Example: <local_instance>/page.do.\n\n\
 -i, --iter:\n\
-        How many times the tool will fuzz Fenix, by reusing the inputs with the best results.\n\
+        How many times the tool will fuzz Fenix, reusing the inputs with the best results.\n\
         Defaults to 1 if not specified.\n\
         Example: 2.\n\n\
 -h, --help:\n\
         Shows this text."
 
-HELP_MESSAGE = "Please check that a value was correctly specified for the {0} option."
+ERROR_MESSAGE = "Please check that a value was correctly specified for the {0} option."
 
 
 def parse_command_line():
@@ -45,9 +45,9 @@ def parse_command_line():
         try:
             path = sys.argv[path_index]
             if not os.path.isfile(path):
-                terminate(HELP_MESSAGE.format("-f/--file"), 1)
+                terminate(ERROR_MESSAGE.format("-f/--file"), 1)
         except IndexError:
-            terminate(HELP_MESSAGE.format("-f/--file"), 1)
+            terminate(ERROR_MESSAGE.format("-f/--file"), 1)
     else:
         terminate("-f/--file option not specified", 1)
 
@@ -59,7 +59,7 @@ def parse_command_line():
         try:
             globalvars.START_PAGE = sys.argv[url_index]
         except IndexError:
-            terminate(HELP_MESSAGE.format("-l/--url"), 1)
+            terminate(ERROR_MESSAGE.format("-l/--url"), 1)
     elif "-i" in sys.argv or "--iter" in sys.argv:
         try:
             iter_index = sys.argv.index("-i") + 1
@@ -68,15 +68,16 @@ def parse_command_line():
         try:
             globalvars.ITERATIONS = int(sys.argv[iter_index])
         except ValueError:
-            terminate(HELP_MESSAGE.format("-i/--iter"), 1)
+            terminate(ERROR_MESSAGE.format("-i/--iter"), 1)
     return path
 
 
 def read_properties_file(path, sep=" = ", comment_char="#"):
     """
-        Reads the .properties file and parses its values. If any error occurs,
-        it prints a message and kills the program.
+        Parses the .properties file's values. If any error occurs, it prints a
+        message and kills the program.
     """
+
     try:
         props = {}
         with open(path, "r") as properties_file:
@@ -87,13 +88,14 @@ def read_properties_file(path, sep=" = ", comment_char="#"):
                     props[key_value[0].strip()] = key_value[1].strip("\" \t")
         return props
     except OSError:
-        terminate(HELP_MESSAGE.format("-f/--file"), 1)
+        terminate(ERROR_MESSAGE.format("-f/--file"), 1)
 
 
 def terminate(message, code):
     """
-        Prints a message and exits the main program with the given error code
+        Prints a message and exits the main program with the given error code.
     """
+
     if code == 1:
         printf("ERROR:\n\t" + message)
     else:
@@ -103,7 +105,8 @@ def terminate(message, code):
 
 def printf(message, end="\n"):
     """
-        A custom alternative to Python's builtin print function
+        An alternative to Python's builtin print function.
     """
+
     sys.stdout.write(str(message) + end)
     sys.stdout.flush()

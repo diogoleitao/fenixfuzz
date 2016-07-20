@@ -37,7 +37,6 @@ class Submitter(object):
             request = requests.get(final_url, cookies=self.cookies, data=self.form_payload)
         elif method == "POST":
             request = requests.post(final_url, cookies=self.cookies, data=self.form_payload)
-
         self.check_request(request)
 
     def check_request(self, request):

@@ -1,19 +1,27 @@
 """
     Main script
 """
-
+from threading import Thread
 from urllib.parse import urlparse
-import threading
 import requests
 
 import globalvars
-from scraping import FormParser, LinkCrawler
-from utils import read_properties_file, parse_command_line
+from scraping import FormParser
+from scraping import LinkCrawler
+from utils import parse_command_line
+from utils import read_properties_file
 
 
 def _main():
     """
-        The FenixFuzz main flow
+        The FenixFuzz main flow:
+        1. Read .properties file;
+        2. Extract the context path and local instance base url;
+        3. Get the start page and add it to the LINKS_QUEUE;
+        4. Perform login and retrieve cookies;
+        5. Crawl FenixEdu and save all the links (no duplicates);
+        6. Parse every form found, fill it with fuzz patters and submit it;
+        7. Dump the information gathered.
     """
 
     path = parse_command_line()
@@ -36,6 +44,11 @@ def _main():
     if globalvars.START_PAGE is None:
         globalvars.START_PAGE = properties["start_page"]
 
+    if not globalvars.START_PAGE.startswith(globalvars.LOCAL_CONTEXT_PATH):
+        globalvars.START_PAGE = globalvars.LOCAL_CONTEXT_PATH + globalvars.START_PAGE
+
+    globalvars.LINKS_QUEUE.put(globalvars.START_PAGE)
+
     globalvars.LOGIN_ENDPOINT = properties["login_endpoint"]
 
     login_url = globalvars.BASE_URL + globalvars.LOCAL_CONTEXT_PATH + globalvars.LOGIN_ENDPOINT
@@ -44,35 +57,26 @@ def _main():
         "password": ""
     }
 
-    if 1 == 1:
-        return
-
     response = requests.post(login_url, data=login_data)
     cookies = response.headers.get("set-cookie")
     cookies = cookies.replace(";", "").replace(",", "").split(" ")
 
     globalvars.COOKIES = {
-        "JSESSIONID": cookies[0].split("=")[1],
-        "contextPath": cookies[2].split("=")[1]
+        "contextPath": cookies[0].split("=")[1],
+        "JSESSIONID": cookies[2].split("=")[1]
     }
 
-    populate = LinkCrawler(globalvars.BASE_URL + globalvars.LOCAL_CONTEXT_PATH + globalvars.START_PAGE, globalvars.COOKIES)
-    populate.crawl()
-
-    crawler_threads = []
-    for i in range(globalvars.CRAWLER_THREADS):
-        url = globalvars.LINKS_QUEUE.get()
-        link_crawler = LinkCrawler(url, globalvars.COOKIES)
-        crawler_thread = threading.Thread(target=link_crawler.crawl)
-        crawler_threads.append(crawler_thread)
+    for _ in range(globalvars.CRAWLER_THREADS):
+        link_crawler = LinkCrawler(globalvars.COOKIES)
+        crawler_thread = Thread(target=link_crawler.crawl)
+        crawler_thread.setDaemon(True)
         crawler_thread.start()
+    globalvars.LINKS_QUEUE.join()
 
-    for thread in crawler_threads:
-        thread.join()
+    if 1 == 1:
+        return
 
-    print(globalvars.CRAWLED_LINKS_QUEUE)
-
-    for i in range(len(globalvars.CRAWLED_LINKS_QUEUE)):
+    for _ in range(globalvars.CRAWLER_THREADS):
         url = globalvars.CRAWLED_LINKS_QUEUE.popleft()
         form_parser = FormParser(url, globalvars.COOKIES)
         form_parser.parse()
