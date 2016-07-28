@@ -10,7 +10,7 @@ FenixFuzz is a software fuzzer for [IST](http://tecnico.ulisboa.pt/)'s [FenixEdu
 ## Configuring FenixFuzz
 The fuzzer's many properties and settings are configured via the *config/fenixfuzz.properties* file, which should be modified accordingly to each usage. Each one of the file's entries is explained below.
 
-*minimum/maximum*: minimum/maximum size of the fuzz patterns to be generated. Each value should be greater than 0.
+__*minimum/maximum*__: minimum/maximum size of the fuzz patterns to be generated. Each value should be greater than 0.
 
     minimum = 1
     maximum = 20
