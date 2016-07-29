@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 
 import globalvars
 from submitter import Submitter
+from form import Form, Field
 
 
 def normalize_url(url):
@@ -34,8 +35,8 @@ class LinkCrawler(object):
         - CRAWLED_LINKS_QUEUE for storing links that have already been visited.
     """
 
-    def __init__(self, cookies):
-        self.url = ""
+    def __init__(self, url, cookies):
+        self.url = normalize_url(url)
         self.cookies = cookies
         self.exclude_patterns = ["/downloadFile", "/logout"]
         with open(globalvars.EXCLUDE_URLS_FILE, "r") as exclude_patterns_file:
@@ -60,7 +61,6 @@ class LinkCrawler(object):
         """
 
         while True:
-            self.url = normalize_url(globalvars.LINKS_QUEUE.get())
             if self.url_ok():
                 request = requests.get(self.url, cookies=self.cookies)
                 html_tree = request.text
@@ -72,13 +72,12 @@ class LinkCrawler(object):
                         if href.startswith(globalvars.LOCAL_CONTEXT_PATH) or href.startswith(globalvars.BASE_URL):
                             if href not in globalvars.CRAWLED_LINKS_QUEUE:
                                 globalvars.CRAWLED_LINKS_QUEUE.append(href)
-                                globalvars.LINKS_QUEUE.put(href)
+                                globalvars.LINKS_QUEUE.append(href)
                     except AttributeError:
                         # Some of the href attributes are blank or aren't of
                         # type 'string', which can't be coerced; so, we just
                         # ignore the errors.
                         continue
-            globalvars.LINKS_QUEUE.task_done()
 
 
 class FormParser(object):
@@ -95,34 +94,43 @@ class FormParser(object):
 
     def parse(self):
         """
-            Finds all forms in the page processes and fills each field by type
-            and submits the form to the proper URL (via the Submitter class).
+            Finds all forms in the page processes, fills each field and submits
+            the form to the proper URL.
         """
 
         request = requests.get(self.url, cookies=self.cookies)
         html_tree = request.text
         forms = BeautifulSoup(html_tree, "html.parser").find_all("form")
+
         for form in forms:
-            form_data = {}
+            form_id = form.get("id")
+            form_action = form.get("action")
+            form_method = form.get("method")
+            field_list = []
+
             fields = form.find_all("input")
             for field in fields:
-                name_value_pair = self.process_field_by_type(form, field)
-                if name_value_pair is not None:
-                    form_data[name_value_pair[0]] = name_value_pair[1]
-            submitter = Submitter(self.url, self.cookies, form.get("action"), form.get("method"), form_data)
+                field_info = self.process_field(form, field)
+                if field_info is not None:
+                    field_object = Field(field_info[0], field_info[1], field_info[2])
+                    field_list.append(field_object)
+
+            form_object = Form(form_id, field_list, form_action, form_method)
+            submitter = Submitter(self.url, self.cookies, form_object)
             submitter.submit()
 
-    def process_field_by_type(self, form, field):
+    def process_field(self, form, field):
         """
-            bla
+            TODO
         """
 
         try:
-            field_type = field.get("type")
             field_name = field.get("name")
+            field_type = field.get("type")
             field_value = field.get("value")
+
             if field_type == "hidden":
-                return field_name, field_value
+                return field_name, field_type, field_value
             elif field_type == "text":
                 try:
                     if field_name != "j_captcha_response":
@@ -135,7 +143,7 @@ class FormParser(object):
                             fuzz_pattern = "0123456789"
                         elif final_name == "email":
                             fuzz_pattern = "mail@ist.utl.pt"
-                        return field_name, fuzz_pattern
+                        return field_name, field_type, fuzz_pattern
                 except AttributeError:
                     # Some input attributes are blank or aren't of type
                     # 'string', which can't be coerced; so, we just ignore
@@ -144,18 +152,18 @@ class FormParser(object):
             elif field_type == "radio":
                 radio_options = form.find_all("input", {"type": "radio"})
                 selected = radio_options[random.randrange(len(radio_options))]
-                return selected.get("name"), selected.get("value")
+                return selected.get("name"), field_type, selected.get("value")
             elif field_type == "checkbox":
                 checkboxes = form.find_all("input", {"type": "checkbox"})
                 selected = checkboxes[random.randrange(len(checkboxes))]
                 if selected.has_attr("value"):
-                    return selected.get("name"), selected.get("value")
+                    return selected.get("name"), field_type, selected.get("value")
                 else:
-                    return selected.get("name"), "on"
+                    return selected.get("name"), field_type, "on"
             elif "date" in field_type:
                 pass
             elif field_type == "email":
-                return field_name, "example@example.com"
+                return field_name, field_type, "example@example.com"
             elif field_type == "search":
                 pass
         except AttributeError:

@@ -1,18 +1,19 @@
 """
     Main script
 """
-from threading import Thread
+
 from urllib.parse import urlparse
 import requests
 
 import globalvars
 from scraping import FormParser
 from scraping import LinkCrawler
+from report import generate_html_report
 from utils import parse_command_line
 from utils import read_properties_file
 
 
-def _main():
+def main():
     """
         The FenixFuzz main flow:
         1. Read .properties file;
@@ -47,7 +48,7 @@ def _main():
     if not globalvars.START_PAGE.startswith(globalvars.LOCAL_CONTEXT_PATH):
         globalvars.START_PAGE = globalvars.LOCAL_CONTEXT_PATH + globalvars.START_PAGE
 
-    globalvars.LINKS_QUEUE.put(globalvars.START_PAGE)
+    globalvars.LINKS_QUEUE.append(globalvars.START_PAGE)
 
     globalvars.LOGIN_ENDPOINT = properties["login_endpoint"]
 
@@ -66,12 +67,10 @@ def _main():
         "JSESSIONID": cookies[2].split("=")[1]
     }
 
-    for _ in range(globalvars.CRAWLER_THREADS):
-        link_crawler = LinkCrawler(globalvars.COOKIES)
-        crawler_thread = Thread(target=link_crawler.crawl)
-        crawler_thread.setDaemon(True)
-        crawler_thread.start()
-    globalvars.LINKS_QUEUE.join()
+    while globalvars.LINKS_QUEUE:
+        url = globalvars.LINKS_QUEUE.popleft()
+        link_crawler = LinkCrawler(url, globalvars.COOKIES)
+        link_crawler.crawl()
 
     if 1 == 1:
         return
@@ -81,7 +80,8 @@ def _main():
         form_parser = FormParser(url, globalvars.COOKIES)
         form_parser.parse()
 
+    generate_html_report()
 
 # Standard Python "main" invocation
 if __name__ == "__main__":
-    _main()
+    main()

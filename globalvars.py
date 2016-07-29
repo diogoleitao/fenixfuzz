@@ -4,7 +4,6 @@
 """
 
 from collections import deque
-from queue import Queue
 
 ##################################################################
 # VARIABLES READ (OR DERIVED) FROM THE FENIXFUZZ.PROPERTIES FILE #
@@ -34,9 +33,9 @@ ITERATIONS = None
 
 
 # Queue containing all the forms acquired after crawling
-FORMS_QUEUE = Queue()
+FORMS_QUEUE = deque([])
 # Queue used for crawling FenixEdu and saving all the links found
-LINKS_QUEUE = Queue()
+LINKS_QUEUE = deque([])
 # Queue containing all found links (no duplicates)
 CRAWLED_LINKS_QUEUE = deque([])
 # Cookies' dictionary, sent in every request
@@ -47,3 +46,5 @@ FUZZ_PATTERNS = []
 CRAWLER_THREADS = 20
 # Number of threads to execute "parallel" requests
 REQUESTS_THREADS = 1
+# List of errors
+ERRORS = []

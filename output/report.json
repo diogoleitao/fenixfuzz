@@ -1,0 +1,21 @@
+[
+    {
+        "url": "example.com",
+        "forms": [
+            {
+                "id": "form12345",
+                "fields": [
+                    {
+                        "name": "studentID",
+                        "type": "text",
+                        "value": "ist12345"
+                    }
+                ],
+                "error": {
+                    "code": "500",
+                    "message": "An error occurred."
+                }
+            }
+        ]
+    }
+]

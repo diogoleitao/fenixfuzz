@@ -1,9 +1,10 @@
 """
-    Single use functions and message templates
+    Global functions and message templates
 """
 
 import os.path
 import sys
+
 import globalvars
 
 # The help message to be displayed. It is "oddly" formatted so it is easier to
@@ -27,6 +28,8 @@ OPTIONS:\n\
         Shows this text."
 
 ERROR_MESSAGE = "Please check that a value was correctly specified for the {0} option."
+
+NO_FORM_ACTION = "Form has no explicit action, so can't be tested."
 
 
 def parse_command_line():
