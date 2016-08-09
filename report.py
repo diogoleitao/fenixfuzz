@@ -6,6 +6,7 @@ import json
 
 import globalvars
 
+
 def build_field_data(submitter):
     """
         Creates an object containing the fields data

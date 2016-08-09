@@ -10,6 +10,7 @@ from scraping import FormParser
 from scraping import LinkCrawler
 from report import generate_html_report
 from utils import parse_command_line
+from utils import read_exclude_urls_file
 from utils import read_properties_file
 
 
@@ -27,6 +28,7 @@ def main():
 
     path = parse_command_line()
     properties = read_properties_file(path)
+    read_exclude_urls_file()
 
     globalvars.MINIMUM = properties["minimum"]
     globalvars.MAXIMUM = properties["maximum"]
@@ -70,7 +72,7 @@ def main():
     while globalvars.LINKS_QUEUE:
         url = globalvars.LINKS_QUEUE.popleft()
         link_crawler = LinkCrawler(url, globalvars.COOKIES)
-        link_crawler.crawl()
+        link_crawler.run()
 
     if 1 == 1:
         return
@@ -78,7 +80,7 @@ def main():
     for _ in range(globalvars.CRAWLER_THREADS):
         url = globalvars.CRAWLED_LINKS_QUEUE.popleft()
         form_parser = FormParser(url, globalvars.COOKIES)
-        form_parser.parse()
+        form_parser.run()
 
     generate_html_report()
 

@@ -4,6 +4,7 @@
 
 import os.path
 import sys
+import json
 
 import globalvars
 
@@ -92,6 +93,16 @@ def read_properties_file(path, sep=" = ", comment_char="#"):
         return props
     except OSError:
         terminate(ERROR_MESSAGE.format("-f/--file"), 1)
+
+
+def read_exclude_urls_file():
+    """
+        Parses the content of the file containing the URLs to be excluded while
+        crawling and adds them to the global variable EXCLUDE_URLS
+    """
+
+    with open(globalvars.EXCLUDE_URLS_FILE, "r") as exclude_patterns_file:
+        globalvars.EXCLUDE_URLS += json.loads(exclude_patterns_file.read())
 
 
 def terminate(message, code):

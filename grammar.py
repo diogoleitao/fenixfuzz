@@ -1,3 +1,6 @@
+"""
+    Grammar stuff
+"""
 import random
 import string
 

@@ -52,6 +52,18 @@ class Submitter(object):
             Registers if an error occurred
         """
 
+        new_cookies = request.headers.get("set-cookie")
+        new_cookies = new_cookies.replace(";", "").replace(",", "").split(" ")
+
+        new_ctx_path = new_cookies[0].split("=")[1]
+        new_jsessionid = new_cookies[2].split("=")[1]
+
+        if new_ctx_path != globalvars.COOKIES["contexPath"]:
+            print("Context path after request doesn't match!")  # Error?
+
+        if new_jsessionid != globalvars.COOKIES["JSESSIONID"]:
+            print("Session cookie after request doesn't match!")  # Update?
+
         server_error_pattern = re.compile("^5[0-9][0-9]$")
         status_code = str(request.status_code)
         if server_error_pattern.match(status_code):

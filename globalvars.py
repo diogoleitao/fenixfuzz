@@ -6,7 +6,7 @@
 from collections import deque
 
 ##################################################################
-# VARIABLES READ (OR DERIVED) FROM THE FENIXFUZZ.PROPERTIES FILE #
+###### VARIABLES READ (OR DERIVED) FROM FENIXFUZZ.PROPERTIES #####
 ##################################################################
 # Minimum fuzz pattern string length
 MINIMUM = None
@@ -20,18 +20,21 @@ USER = None
 EXCLUDE_URLS_FILE = None
 # Set of rules to generate input
 FENIXFUZZ_MODEL_FILE = None
-# Local instance context path
+# Local instance context path (derived)
 LOCAL_CONTEXT_PATH = None
-#
+# Crawler's starting page
 START_PAGE = None
-#
+# Endpoint URL to perform login on local instance
 LOGIN_ENDPOINT = None
-#
+# Local instance's base URL (derived)
 BASE_URL = None
-#
+# Number of iterations
 ITERATIONS = None
 
 
+##################################################################
+####################### AUXILIARY VARIABLES ######################
+##################################################################
 # Queue containing all the forms acquired after crawling
 FORMS_QUEUE = deque([])
 # Queue used for crawling FenixEdu and saving all the links found
@@ -48,3 +51,5 @@ CRAWLER_THREADS = 20
 REQUESTS_THREADS = 1
 # List of errors
 ERRORS = []
+# Exclude URL patterns
+EXCLUDE_URLS = []

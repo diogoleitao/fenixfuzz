@@ -2,8 +2,7 @@
     FenixEdu web scraping utility classes
 """
 
-import json
-import random
+# import random
 import string
 import requests
 
@@ -26,6 +25,18 @@ def normalize_url(url):
         return url
 
 
+def url_ok(url):
+    """
+        Checks if the url does not have non-printable characters or if it
+        matches any of the exclude pattern.
+    """
+
+    printable_charset = string.printable + "ãâáàäẽêéèëĩîíìïõôóòöũûúùüçÇ"
+    non_printable = not all(char in printable_charset for char in url)
+    exclude = any(pattern in url for pattern in globalvars.EXCLUDE_URLS)
+    return not non_printable and not exclude
+
+
 class LinkCrawler(object):
     """
         Responsible for crawling FenixEdu, by performing a GET request for each
@@ -38,20 +49,6 @@ class LinkCrawler(object):
     def __init__(self, url, cookies):
         self.url = normalize_url(url)
         self.cookies = cookies
-        self.exclude_patterns = ["/downloadFile", "/logout"]
-        with open(globalvars.EXCLUDE_URLS_FILE, "r") as exclude_patterns_file:
-            self.exclude_patterns += json.loads(exclude_patterns_file.read())
-
-    def url_ok(self):
-        """
-            Checks if the url does not have non-printable characters or if it
-            matches any of the exclude pattern.
-        """
-
-        printable_charset = string.printable + "ãâáàäẽêéèëĩîíìïõôóòöũûúùüçÇ"
-        non_printable = not all(char in printable_charset for char in self.url)
-        exclude = any(pattern in self.url for pattern in self.exclude_patterns)
-        return not non_printable and not exclude
 
     def crawl(self):
         """
@@ -60,24 +57,28 @@ class LinkCrawler(object):
             already visited.
         """
 
-        while True:
-            if self.url_ok():
-                request = requests.get(self.url, cookies=self.cookies)
-                html_tree = request.text
-                anchors = BeautifulSoup(html_tree, "html.parser").find_all("a")
-                for anchor in anchors:
-                    try:
-                        href = anchor.get("href")
-                        # Only save same domain links
-                        if href.startswith(globalvars.LOCAL_CONTEXT_PATH) or href.startswith(globalvars.BASE_URL):
-                            if href not in globalvars.CRAWLED_LINKS_QUEUE:
-                                globalvars.CRAWLED_LINKS_QUEUE.append(href)
-                                globalvars.LINKS_QUEUE.append(href)
-                    except AttributeError:
-                        # Some of the href attributes are blank or aren't of
-                        # type 'string', which can't be coerced; so, we just
-                        # ignore the errors.
-                        continue
+        request = requests.get(self.url, cookies=self.cookies)
+        html_tree = request.text
+        anchors = BeautifulSoup(html_tree, "html.parser").find_all("a")
+        for anchor in anchors:
+            try:
+                href = anchor.get("href")
+                # Only save same domain links
+                if href.startswith(globalvars.LOCAL_CONTEXT_PATH) or href.startswith(globalvars.BASE_URL):
+                    if href not in globalvars.CRAWLED_LINKS_QUEUE and url_ok(href):
+                        globalvars.CRAWLED_LINKS_QUEUE.append(href)
+                        globalvars.LINKS_QUEUE.append(href)
+            except AttributeError:
+                # Some of the href attributes are blank or aren't of
+                # type 'string', which can't be coerced; so, we just
+                # ignore the errors.
+                continue
+
+    def run(self):
+        """
+            Executes the crawl function
+        """
+        self.crawl()
 
 
 class FormParser(object):
@@ -119,54 +120,60 @@ class FormParser(object):
             submitter = Submitter(self.url, self.cookies, form_object)
             submitter.submit()
 
+    def run(self):
+        """
+            Executes the parse function
+        """
+        self.parse()
+
     def process_field(self, form, field):
         """
             TODO
         """
+        pass
+        # try:
+        #     field_name = field.get("name")
+        #     field_type = field.get("type")
+        #     field_value = field.get("value")
 
-        try:
-            field_name = field.get("name")
-            field_type = field.get("type")
-            field_value = field.get("value")
-
-            if field_type == "hidden":
-                return field_name, field_type, field_value
-            elif field_type == "text":
-                try:
-                    if field_name != "j_captcha_response":
-                        fuzz_pattern = ""
-                        name = field_name.split(":")
-                        final_name = name[len(name) - 1]
-                        if final_name == "studentNumber":
-                            fuzz_pattern = "19"
-                        elif final_name == "documentIdNumber":
-                            fuzz_pattern = "0123456789"
-                        elif final_name == "email":
-                            fuzz_pattern = "mail@ist.utl.pt"
-                        return field_name, field_type, fuzz_pattern
-                except AttributeError:
-                    # Some input attributes are blank or aren't of type
-                    # 'string', which can't be coerced; so, we just ignore
-                    # the errors.
-                    pass
-            elif field_type == "radio":
-                radio_options = form.find_all("input", {"type": "radio"})
-                selected = radio_options[random.randrange(len(radio_options))]
-                return selected.get("name"), field_type, selected.get("value")
-            elif field_type == "checkbox":
-                checkboxes = form.find_all("input", {"type": "checkbox"})
-                selected = checkboxes[random.randrange(len(checkboxes))]
-                if selected.has_attr("value"):
-                    return selected.get("name"), field_type, selected.get("value")
-                else:
-                    return selected.get("name"), field_type, "on"
-            elif "date" in field_type:
-                pass
-            elif field_type == "email":
-                return field_name, field_type, "example@example.com"
-            elif field_type == "search":
-                pass
-        except AttributeError:
-            # Some input attributes are blank or aren't of type 'string', which
-            # can't be coerced; so, we just ignore the errors.
-            pass
+        #     if field_type == "hidden":
+        #         return field_name, field_type, field_value
+        #     elif field_type == "text":
+        #         try:
+        #             if field_name != "j_captcha_response":
+        #                 fuzz_pattern = ""
+        #                 name = field_name.split(":")
+        #                 final_name = name[len(name) - 1]
+        #                 if final_name == "studentNumber":
+        #                     fuzz_pattern = "19"
+        #                 elif final_name == "documentIdNumber":
+        #                     fuzz_pattern = "0123456789"
+        #                 elif final_name == "email":
+        #                     fuzz_pattern = "mail@ist.utl.pt"
+        #                 return field_name, field_type, fuzz_pattern
+        #         except AttributeError:
+        #             # Some input attributes are blank or aren't of type
+        #             # 'string', which can't be coerced; so, we just ignore
+        #             # the errors.
+        #             pass
+        #     elif field_type == "radio":
+        #         radio_options = form.find_all("input", {"type": "radio"})
+        #         selected = radio_options[random.randrange(len(radio_options))]
+        #         return selected.get("name"), field_type, selected.get("value")
+        #     elif field_type == "checkbox":
+        #         checkboxes = form.find_all("input", {"type": "checkbox"})
+        #         selected = checkboxes[random.randrange(len(checkboxes))]
+        #         if selected.has_attr("value"):
+        #             return selected.get("name"), field_type, selected.get("value")
+        #         else:
+        #             return selected.get("name"), field_type, "on"
+        #     elif "date" in field_type:
+        #         pass
+        #     elif field_type == "email":
+        #         return field_name, field_type, "example@example.com"
+        #     elif field_type == "search":
+        #         pass
+        # except AttributeError:
+        #     # Some input attributes are blank or aren't of type 'string', which
+        #     # can't be coerced; so, we just ignore the errors.
+        #     pass
