@@ -3,7 +3,10 @@ FenixFuzz is a software fuzzer for [IST](http://tecnico.ulisboa.pt/)'s [FenixEdu
 
 ## Dependencies
 - Python 3.4.3^
-- Beautiful Soup 4 (pip install beautifulsoup4)
+- Beautiful Soup 4
+
+
+    pip install beautifulsoup4
 
 ## Overview
 1. FenixFuzz logs in through a local instance of FenixEdu with a given user and crawls every page it can reach;
