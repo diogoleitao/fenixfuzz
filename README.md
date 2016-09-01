@@ -3,7 +3,7 @@ FenixFuzz is a software fuzzer for [IST](http://tecnico.ulisboa.pt/)'s [FenixEdu
 
 ## Dependencies
 - Python 3.4.3^
-- Beautiful Soup 4
+- Beautiful Soup 4 (see [documentation](http://www.crummy.com/software/BeautifulSoup/bs4/doc))
 
 <!-- -->
 
