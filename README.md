@@ -1,6 +1,10 @@
 # FenixFuzz
 FenixFuzz is a software fuzzer for [IST](http://tecnico.ulisboa.pt/)'s [FenixEdu](http://fenixedu.org/) system, developed within the scope of a MSc thesis. The main goal is to integrate this tool in the FenixEdu's development and build process, so that bugs are spotted earlier.
 
+## Dependencies
+- Python 3.4.3^
+- Beautiful Soup 4 (pip install beautifulsoup4)
+
 ## Overview
 1. FenixFuzz logs in through a local instance of FenixEdu with a given user and crawls every page it can reach;
 2. For each page, retrieves its forms and fills them with fuzz patterns, either using generation-based or mutation-based fuzzing (see *Configuring FenixFuzz*);
