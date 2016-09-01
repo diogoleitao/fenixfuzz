@@ -1,9 +1,9 @@
 # FenixFuzz
-FenixFuzz is a software fuzzer for [IST](http://tecnico.ulisboa.pt/)'s [FenixEdu](http://fenixedu.org/) system, developed within the scope of a MSc thesis. The main goal is to integrate this tool in the FenixEdu's development and build process, so that bugs are spotted earlier.
+FenixFuzz is a software fuzzer for [IST](https://tecnico.ulisboa.pt/)'s [FenixEdu](https://fenixedu.org/) system, developed within the scope of a MSc thesis. The main goal is to integrate this tool in the FenixEdu's development and build process, so that bugs are spotted earlier.
 
 ## Dependencies
 - Python 3.4.3^
-- Beautiful Soup 4 (see [documentation](http://www.crummy.com/software/BeautifulSoup/bs4/doc))
+- Beautiful Soup 4 (see [documentation](https://www.crummy.com/software/BeautifulSoup/bs4/doc))
 
 <!-- -->
 
