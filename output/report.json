@@ -1,19 +1,42 @@
 [
     {
-        "url": "example.com",
+        "url": "fenix.tecnico.ulisboa.pt/example",
         "forms": [
             {
-                "id": "form12345",
+                "id": "12345",
                 "fields": [
                     {
                         "name": "studentID",
                         "type": "text",
-                        "value": "ist12345"
+                        "value": "ist100000"
+                    },
+                    {
+                        "name": "personalEmail",
+                        "type": "email",
+                        "value": "example@error.com"
                     }
                 ],
+                "action": "/submit_info.do",
+                "method": "GET",
                 "error": {
                     "code": "500",
                     "message": "An error occurred."
+                }
+            },
+            {
+                "id": "67890",
+                "fields": [
+                    {
+                        "name": "contact",
+                        "type": "text",
+                        "value": "+351961234567"
+                    }
+                ],
+                "action": "/update_contact.do",
+                "method": "POST",
+                "error": {
+                    "code": "501",
+                    "message": "Functionality not implemented."
                 }
             }
         ]
