@@ -7,7 +7,13 @@ FenixFuzz is a software fuzzer for [IST](https://tecnico.ulisboa.pt/)'s [FenixEd
 
 <!-- -->
 
-	pip install beautifulsoup4
+	pip3 install beautifulsoup4
+
+- json2html (see [documentation](https://pypi.python.org/pypi/json2html))
+
+<!-- -->
+
+	pip3 install json2html
 
 ## Overview
 1. FenixFuzz logs in through a local instance of FenixEdu with a given user and crawls every page it can reach;
