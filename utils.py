@@ -2,11 +2,12 @@
     Global functions and message templates
 """
 
+import json
 import os.path
 import sys
-import json
 
 import globalvars
+import scraping
 
 # The help message to be displayed. It is "oddly" formatted so it is easier to
 # see how the final message will look (instead of using \t and \n characters to
@@ -97,12 +98,23 @@ def read_properties_file(path, sep=" = ", comment_char="#"):
 
 def read_exclude_urls_file():
     """
-        Parses the content of the file containing the URLs to be excluded while
+        Parses the contents of the file containing the URLs to be excluded while
         crawling and adds them to the global variable EXCLUDE_URLS
     """
 
     with open(globalvars.EXCLUDE_URLS_FILE, "r") as exclude_patterns_file:
-        globalvars.EXCLUDE_URLS += json.loads(exclude_patterns_file.read())
+        scraping.EXCLUDE_URLS += json.loads(exclude_patterns_file.read())
+
+
+def read_fenixfuzz_model_file():
+    """
+        Parses the contents of the file describing the grammar and creates the
+        appropriate associations between the field types and the regular
+        expressions to be used.
+    """
+
+    with open(globalvars.FENIXFUZZ_MODEL_FILE, "r") as ffm_file:
+        return json.loads(ffm_file.read())
 
 
 def terminate(message, code):

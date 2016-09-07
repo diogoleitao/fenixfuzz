@@ -4,12 +4,14 @@
 
 import json
 
+import json2html
+
 import globalvars
 
 
 def build_field_data(submitter):
     """
-        Creates an object containing the fields data
+        Creates a dictionary containing the fields' data
     """
 
     field_list = []
@@ -26,12 +28,14 @@ def build_field_data(submitter):
 
 def build_error_data(submitter, code, message):
     """
-        Creates an object containing the form and error data
+        Creates a dictionary containing the form's and error's data
     """
 
     return {
         "id": submitter.form.get_id(),
         "fields": build_field_data(submitter),
+        "action": submitter.form.get_action(),
+        "method": submitter.form.get_method(),
         "error": {
             "code": code,
             "message": message
@@ -46,16 +50,32 @@ def generate_html_report():
 
     generate_json_report()
 
-    with open("report.html", "w") as report_file:
-        with open("report.json", "r") as json_data:
-            print(report_file)
-            print(json_data)
+    # with open("output/report_test.html", "w") as report_file:
+    json_data = None
+    with open("output/report.json", "r") as json_file:
+        json_data = json.loads(json_file.read())
+    for data in json_data:
+        url = data['url']
+
+        forms = data['forms']
+        for form in forms:
+            fid = form['id']
+            method = form['method']
+            action = form['action']
+            error_code = form['error']['code']
+            error_message = form['error']['message']
+
+            fields = form['fields']
+            for field in fields:
+                name = field['name']
+                ftype = field['type']
+                value = field['value']
 
 
 def generate_json_report():
     """
-        Generates JSON report file
+        Generates JSON report file from the data gathered
     """
 
-    with open("report.json", "w") as report_file:
+    with open("output/report.json", "w") as report_file:
         json.dump(globalvars.ERRORS, report_file)

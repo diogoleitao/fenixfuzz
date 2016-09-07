@@ -45,11 +45,5 @@ CRAWLED_LINKS_QUEUE = deque([])
 COOKIES = {}
 # List of generated fuzz patterns
 FUZZ_PATTERNS = []
-# Number of threads to crawl "parallel"
-CRAWLER_THREADS = 20
-# Number of threads to execute "parallel" requests
-REQUESTS_THREADS = 1
 # List of errors
-ERRORS = []
-# Exclude URL patterns
-EXCLUDE_URLS = []
+ERRORS = {}

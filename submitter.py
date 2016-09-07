@@ -8,8 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 
 import globalvars
-from report import build_error_data
 import utils
+from report import build_error_data
 
 
 class Submitter(object):
@@ -31,7 +31,10 @@ class Submitter(object):
         """
 
         if self.form.get_action() is None:
-            globalvars.ERRORS.append(build_error_data(self, None, utils.NO_FORM_ACTION))
+            error_data = build_error_data(self, None, utils.NO_FORM_ACTION)
+            if not self.form.get_url() in globalvars.ERRORS:
+                globalvars.ERRORS[self.form.get_url()] = []
+            globalvars.ERRORS[self.form.get_url()].append(error_data)
             return
 
         method = self.form.get_method().upper()
@@ -52,11 +55,13 @@ class Submitter(object):
             Registers if an error occurred
         """
 
-        new_cookies = request.headers.get("set-cookie")
-        new_cookies = new_cookies.replace(";", "").replace(",", "").split(" ")
+        cookies = request.headers.get("set-cookie")
+        if cookies is None:
+            cookies = request.headers.get("cookie")
+        cookies = new_cookies.replace(";", "").replace(",", "").split(" ")
 
-        new_ctx_path = new_cookies[0].split("=")[1]
-        new_jsessionid = new_cookies[2].split("=")[1]
+        new_ctx_path = cookies[0].split("=")[1]
+        new_jsessionid = cookies[2].split("=")[1]
 
         if new_ctx_path != globalvars.COOKIES["contexPath"]:
             print("Context path after request doesn't match!")  # Error?
@@ -67,7 +72,10 @@ class Submitter(object):
         server_error_pattern = re.compile("^5[0-9][0-9]$")
         status_code = str(request.status_code)
         if server_error_pattern.match(status_code):
-            globalvars.ERRORS.append(build_error_data(self, status_code, request.text))
+            error_data = build_error_data(self, status_code, request.text)
+            if not self.form.get_url() in globalvars.ERRORS:
+                globalvars.ERRORS[self.form.get_url()] = []
+            globalvars.ERRORS[self.form.get_url()].append(error_data)
 
         if 1 == 1:
             return
