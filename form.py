@@ -40,11 +40,19 @@ class Form(object):
         Form data
     """
 
-    def __init__(self, form_id, fields, action, method):
+    def __init__(self, url, form_id, fields, action, method):
+        self.url = url
         self.form_id = form_id
         self.fields = fields
         self.action = action
         self.method = method
+
+    def get_url(self):
+        """
+            Returns the form's page URL
+        """
+
+        return self.url
 
     def get_id(self):
         """
