@@ -7,10 +7,10 @@ import requests
 
 from bs4 import BeautifulSoup
 
+from form import Form
 import globalvars
-# from form import Field
-# from form import Form
-# from submitter import Submitter
+import grammar
+import submitter
 
 EXCLUDE_URLS = []
 
@@ -48,7 +48,8 @@ class LinkCrawler(object):
         lowercase_accented = "ãâáàäẽêéèëĩîíìïõôóòöũûúùüç"
         uppercase_accented = "ÃÂÁÀÄẼÊÉÈËĨÎÍÌÕÔÓÒÖŨÛÚÙÜÇ"
 
-        printable_charset = string.ascii_letters + lowercase_accented + uppercase_accented + string.digits + string.punctuation
+        printable_charset = (string.ascii_letters + lowercase_accented +
+                             uppercase_accented + string.digits + string.punctuation)
         non_printable = not all(char in printable_charset for char in url)
         exclude = any(pattern in url for pattern in EXCLUDE_URLS)
 
@@ -70,7 +71,8 @@ class LinkCrawler(object):
                 href = anchor.get("href")
 
                 # Only save same domain links
-                if href.startswith(globalvars.LOCAL_CONTEXT_PATH) or href.startswith(globalvars.BASE_URL):
+                if (href.startswith(globalvars.LOCAL_CONTEXT_PATH) or
+                        href.startswith(globalvars.BASE_URL)):
                     if href not in globalvars.CRAWLED_LINKS_QUEUE and self.crawlable(href):
                         globalvars.CRAWLED_LINKS_QUEUE.append(href)
                         globalvars.LINKS_QUEUE.append(href)
@@ -111,22 +113,21 @@ class FormParser(object):
         forms = BeautifulSoup(html_tree, "html.parser").find_all("form")
 
         for form in forms:
-            # form_id = form.get("id")
-            # form_action = form.get("action")
-            # form_method = form.get("method")
-            # field_list = []
+            form_id = form.get("id")
+            form_action = form.get("action")
+            form_method = form.get("method")
+            field_list = []
 
             fields = form.find_all("input")
             for field in fields:
-                field_info = self.process_field(form, field)
+                field_info = grammar.process_field(form, field)
 
-                # if field_info is not None:
-                    # field_object = Field(field_info[0], field_info[1], field_info[2])
-                    # field_list.append(field_object)
+                if field_info is not None:
+                    field_list.append(field_info)
 
-            # form_object = Form(form_id, field_list, form_action, form_method)
-            # submitter = Submitter(self.url, self.cookies, form_object)
-            # submitter.submit()
+            form_object = Form(self.url, form_id, field_list, form_action, form_method)
+            submitter = submitter.Submitter(self.url, self.cookies, form_object)
+            submitter.submit()
 
     def run(self):
         """
@@ -134,33 +135,3 @@ class FormParser(object):
         """
 
         self.parse()
-
-    def process_field(self, form, field):
-        """
-            asd
-        """
-
-        try:
-            field_name = field.get("name")
-            field_type = field.get("type")
-            field_value = field.get("value")
-
-            if field_type == "hidden":
-                return
-            if field_type == "submit":
-                return
-            if field_type == "file":
-                return
-            if field_type == "button":
-                return
-            if field_type == "reset":
-                return
-            elif field_name is None:
-                if ":" in field_name:
-                    name = field_name.split(":")
-                    field_name = name[-1]
-                    print(field_name, field_type, field_value)
-            else:
-                print(field_name, field_type, field_value)
-        except AttributeError:
-            pass
