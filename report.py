@@ -13,11 +13,11 @@ def build_field_data(submitter):
     """
 
     field_list = []
-    for field_tuple in submitter.form.get_fields():
+    for field in submitter.form.get_fields():
         field_data = {
-            "name": field_tuple[0],
-            "type": field_tuple[1],
-            "value": field_tuple[2]
+            "name": field.get_name(),
+            "type": field.get_type(),
+            "value": field.get_value()
         }
         field_list.append(field_data)
 
@@ -46,14 +46,14 @@ def generate_html_report():
         Generates HTML report file from JSON file
     """
 
-    # generate_json_report()
+    generate_json_report()
 
     templates = load_templates()
 
     with open("output/report.json", "r") as json_file:
         json_data = json.loads(json_file.read())
 
-    with open("output/report_test.html", "w") as report_file:
+    with open("output/report.html", "w") as report_file:
         report_file.write(templates[0].replace("{pages}", fill_page_templates(json_data, templates)))
 
 
@@ -62,8 +62,12 @@ def generate_json_report():
         Generates JSON report file from the data gathered
     """
 
+    final_data = []
+    for url, form_data in globalvars.ERRORS.items():
+        final_data.append({"url": url, "forms": form_data})
+
     with open("output/report.json", "w") as report_file:
-        json.dump(globalvars.ERRORS, report_file)
+        json.dump(final_data, report_file)
 
 
 def load_templates():
