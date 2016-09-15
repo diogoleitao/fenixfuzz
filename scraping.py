@@ -1,5 +1,5 @@
 """
-    FenixEdu web scraping utility classes
+    FenixEdu web scraping classes
 """
 
 import string
@@ -22,6 +22,7 @@ def normalize_url(url):
 
     if url.startswith("/"):
         return globalvars.BASE_URL + url
+
     else:
         return url
 
@@ -73,6 +74,7 @@ class LinkCrawler(object):
                 # Only save same domain links
                 if (href.startswith(globalvars.LOCAL_CONTEXT_PATH) or
                         href.startswith(globalvars.BASE_URL)):
+
                     if href not in globalvars.CRAWLED_LINKS_QUEUE and self.crawlable(href):
                         globalvars.CRAWLED_LINKS_QUEUE.append(href)
                         globalvars.LINKS_QUEUE.append(href)
@@ -81,13 +83,6 @@ class LinkCrawler(object):
                 # type 'string', which can't be coerced; so, we just
                 # ignore the errors.
                 continue
-
-    def run(self):
-        """
-            Executes the crawl function
-        """
-
-        self.crawl()
 
 
 class FormParser(object):
@@ -126,12 +121,5 @@ class FormParser(object):
                     field_list.append(field_info)
 
             form_object = Form(self.url, form_id, field_list, form_action, form_method)
-            submitter = submitter.Submitter(self.url, self.cookies, form_object)
-            submitter.submit()
-
-    def run(self):
-        """
-            Executes the parse function
-        """
-
-        self.parse()
+            submitter_obj = submitter.Submitter(self.url, self.cookies, form_object)
+            submitter_obj.submit()

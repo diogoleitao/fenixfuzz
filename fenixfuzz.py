@@ -71,15 +71,12 @@ def main():
     while globalvars.LINKS_QUEUE:
         url = globalvars.LINKS_QUEUE.popleft()
         link_crawler = LinkCrawler(url, globalvars.COOKIES)
-        link_crawler.run()
+        link_crawler.crawl()
 
     while globalvars.CRAWLED_LINKS_QUEUE:
         url = globalvars.CRAWLED_LINKS_QUEUE.popleft()
         form_parser = FormParser(url, globalvars.COOKIES)
-        form_parser.run()
-
-    if 1 == 1:
-        return
+        form_parser.parse()
 
     generate_html_report()
 

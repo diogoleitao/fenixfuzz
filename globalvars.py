@@ -1,6 +1,6 @@
 """
     Since Python only allows variables to be defined and not declared, all of
-    them are assigned Python's None value (only the first batch).
+    them are assigned Python's None value (only the first group).
 """
 
 from collections import deque
@@ -45,5 +45,5 @@ CRAWLED_LINKS_QUEUE = deque([])
 COOKIES = {}
 # List of generated fuzz patterns
 FUZZ_PATTERNS = []
-# List of errors
+# Errors found: dictionary between URL and list of forms
 ERRORS = {}

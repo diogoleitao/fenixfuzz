@@ -1,5 +1,5 @@
 """
-    Submitter
+    (see class's documentation)
 """
 
 import re
@@ -32,6 +32,7 @@ class Submitter(object):
 
         if self.form.get_action() is None:
             error_data = build_error_data(self, None, utils.NO_FORM_ACTION)
+
             if not self.form.get_url() in globalvars.ERRORS:
                 globalvars.ERRORS[self.form.get_url()] = []
             globalvars.ERRORS[self.form.get_url()].append(error_data)
@@ -46,8 +47,10 @@ class Submitter(object):
 
         if method == "GET":
             request = requests.get(final_url, cookies=self.cookies, data=form_payload)
+
         elif method == "POST":
             request = requests.post(final_url, cookies=self.cookies, data=form_payload)
+
         self.process_response(request)
 
     def process_response(self, request):
@@ -56,9 +59,10 @@ class Submitter(object):
         """
 
         cookies = request.headers.get("set-cookie")
+
         if cookies is None:
             cookies = request.headers.get("cookie")
-        cookies = new_cookies.replace(";", "").replace(",", "").split(" ")
+        cookies = cookies.replace(";", "").replace(",", "").split(" ")
 
         new_ctx_path = cookies[0].split("=")[1]
         new_jsessionid = cookies[2].split("=")[1]
@@ -71,8 +75,10 @@ class Submitter(object):
 
         server_error_pattern = re.compile("^5[0-9][0-9]$")
         status_code = str(request.status_code)
+
         if server_error_pattern.match(status_code):
             error_data = build_error_data(self, status_code, request.text)
+
             if not self.form.get_url() in globalvars.ERRORS:
                 globalvars.ERRORS[self.form.get_url()] = []
             globalvars.ERRORS[self.form.get_url()].append(error_data)

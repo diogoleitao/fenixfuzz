@@ -1,5 +1,5 @@
 """
-    Global functions and message templates
+    I/O and custom printing functions and message templates
 """
 
 import json
@@ -31,7 +31,7 @@ OPTIONS:\n\
 
 ERROR_MESSAGE = "Please check that a value was correctly specified for the {0} option."
 
-NO_FORM_ACTION = "Form has no explicit action, so can't be tested."
+NO_FORM_ACTION = "Form has no explicit action (destination URL), so can't be tested."
 
 
 def parse_command_line():
@@ -65,6 +65,7 @@ def parse_command_line():
             globalvars.START_PAGE = sys.argv[url_index]
         except IndexError:
             terminate(ERROR_MESSAGE.format("-l/--url"), 1)
+
     elif "-i" in sys.argv or "--iter" in sys.argv:
         try:
             iter_index = sys.argv.index("-i") + 1
@@ -74,6 +75,7 @@ def parse_command_line():
             globalvars.ITERATIONS = int(sys.argv[iter_index])
         except ValueError:
             terminate(ERROR_MESSAGE.format("-i/--iter"), 1)
+
     return path
 
 
@@ -88,9 +90,11 @@ def read_properties_file(path, sep=" = ", comment_char="#"):
         with open(path, "r") as properties_file:
             for line in properties_file:
                 line = line.strip()
+
                 if line and not line.startswith(comment_char):
                     key_value = line.split(sep)
                     props[key_value[0].strip()] = key_value[1].strip("\" \t")
+
         return props
     except OSError:
         terminate(ERROR_MESSAGE.format("-f/--file"), 1)
@@ -124,8 +128,10 @@ def terminate(message, code):
 
     if code == 1:
         printf("ERROR:\n\t" + message)
+
     else:
         printf(message)
+
     sys.exit(code)
 
 

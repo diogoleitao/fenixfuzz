@@ -1,5 +1,5 @@
 """
-    Report generation
+    Report generation functions
 """
 
 import json
@@ -41,6 +41,19 @@ def build_error_data(submitter, code, message):
     }
 
 
+def generate_json_report():
+    """
+        Generates JSON report file from the data gathered
+    """
+
+    final_data = []
+    for url, form_data in globalvars.ERRORS.items():
+        final_data.append({"url": url, "forms": form_data})
+
+    with open("output/report.json", "w") as report_file:
+        json.dump(final_data, report_file)
+
+
 def generate_html_report():
     """
         Generates HTML report file from JSON file
@@ -54,20 +67,7 @@ def generate_html_report():
         json_data = json.loads(json_file.read())
 
     with open("output/report.html", "w") as report_file:
-        report_file.write(templates[0].replace("{pages}", fill_page_templates(json_data, templates)))
-
-
-def generate_json_report():
-    """
-        Generates JSON report file from the data gathered
-    """
-
-    final_data = []
-    for url, form_data in globalvars.ERRORS.items():
-        final_data.append({"url": url, "forms": form_data})
-
-    with open("output/report.json", "w") as report_file:
-        json.dump(final_data, report_file)
+        report_file.write(templates[0].replace("{pages}", fill_page_template(json_data, templates)))
 
 
 def load_templates():
@@ -90,18 +90,21 @@ def load_templates():
     return main, page, form, field
 
 
-def fill_page_templates(pages, templates):
+def fill_page_template(pages, templates):
     """
         Substitute the URL and list of forms for all the pages
     """
 
     final_template = ""
     for page in pages:
-        final_template += templates[1].replace("{url}", page['url']).replace("{forms}", fill_form_templates(page['forms'], templates))
+        final_template += (templates[1]
+                           .replace("{url}", page['url'])
+                           .replace("{forms}", fill_form_template(page['forms'], templates)))
+
     return final_template
 
 
-def fill_form_templates(forms, templates):
+def fill_form_template(forms, templates):
     """
         Substitute the id, method, action, code message and list of fields for
         all the forms
@@ -109,16 +112,27 @@ def fill_form_templates(forms, templates):
 
     final_template = ""
     for form in forms:
-        final_template += templates[2].replace("{id}", form['id']).replace("{method}", form['method']).replace("{action}", form['action']).replace("{code}", form['error']['code']).replace("{message}", form['error']['message']).replace("{fields}", fill_field_templates(form['fields'], templates))
+        final_template += (templates[2]
+                           .replace("{id}", form['id'])
+                           .replace("{method}", form['method'])
+                           .replace("{action}", form['action'])
+                           .replace("{code}", form['error']['code'])
+                           .replace("{message}", form['error']['message'])
+                           .replace("{fields}", fill_field_template(form['fields'], templates)))
+
     return final_template
 
 
-def fill_field_templates(fields, templates):
+def fill_field_template(fields, templates):
     """
         Substitute the name, type and value for all the fields
     """
 
     final_template = ""
     for field in fields:
-        final_template += templates[3].replace("{name}", field['name']).replace("{type}", field['type']).replace("{value}", field['value'])
+        final_template += (templates[3]
+                           .replace("{name}", field['name'])
+                           .replace("{type}", field['type'])
+                           .replace("{value}", field['value']))
+
     return final_template
