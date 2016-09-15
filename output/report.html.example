@@ -7,6 +7,7 @@
         <hr>
         <ul>
             <li><b>ID:</b> 12345</li>
+            <li><b>Fields:</b></li>
             <ul>
                 <li><b>Name:</b> studentID</li>
                 <li><b>Type:</b> text</li>
@@ -25,6 +26,7 @@
         <hr>
         <ul>
             <li><b>ID:</b> 67890</li>
+            <li><b>Fields:</b></li>
             <ul>
                 <li><b>Name:</b> contact</li>
                 <li><b>Type:</b> text</li>
