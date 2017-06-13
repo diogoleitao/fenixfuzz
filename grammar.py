@@ -5,9 +5,12 @@
 import random
 import string
 
+import rstr
+
 import globalvars
 from form import Field
 
+# FUZZABLE_TYPES = ["text", "number", "textarea", "radio", "checkbox", "search", "date"]
 
 CHARSETS = {
     # Alphanumeric, symbols and whitespace characters
@@ -26,7 +29,15 @@ CHARSETS = {
     "num": string.digits
 }
 
-# FUZZABLE_TYPES = ["text", "number", "textarea", "radio", "checkbox", "search", "date"]  # TODO
+GRAMMAR = {}
+
+
+def generate_strings_from_grammar(field_type, field_name):
+    """
+        Returns a string based on a field's type and name
+    """
+    return rstr.xeger(GRAMMAR[field_type][field_name])
+
 
 def generate_strings(charset, length):
     """
@@ -34,6 +45,7 @@ def generate_strings(charset, length):
         characters from a given charset.
     """
     return ''.join(random.choice(charset) for i in range(length))
+
 
 def generate(field_type):
     """
@@ -53,13 +65,23 @@ def generate(field_type):
 
 def process_field(form, field):
     """
-        TODO
+        sample
     """
     try:
         field_name = field.get("name")
         field_type = field.get("type")
         field_value = field.get("value")
 
+        types = ["hidden", "submit", "button", "file", "reset"]
+
+        if field_name is not None:
+            if field_type is not None and field_type not in types:
+                if ":" in field_name:
+                    name = field_name.split(":")
+                    field_name = name[-1]
+                    return field_type + " " + field_name
+
+        return
         if field_type == "hidden":
             return Field(field_name, field_type, field_value)
 
@@ -97,7 +119,6 @@ def process_field(form, field):
 
             if selected.has_attr("value"):
                 return Field(selected.get("name"), field_type, selected.get("value"))
-
             else:
                 return Field(selected.get("name"), field_type, "on")
 

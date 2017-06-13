@@ -1,25 +1,40 @@
-[
-    {
+{
+    "text": {
         "name": "",
-        "fullname": ""
-    },
-    {
-        "email": ""
-    },
-    {
-        "number": ""
-    },
-    {
         "city": "",
-        "district": ""
+        "district": "",
+        "hours": "^[0-9]{2}$",
+        "minutes": "^[0-9]$",
+        "day": "^[0-9]{2}$",
+        "month": "^[0-9]{2}$",
+        "year": "^[0-9]{4}$",
+        "when": "^([0-9]{2}\/){2}([0-9]){4}$",
+        "date": "^([0-9]{2}\/){2}([0-9]){4}$",
+        "email": "^ist([0-9])?([0-9]){5}@tecnico.ulisboa.pt$",
+        "studentnumber": "^(ist([0-9])?([0-9]){5})|([0-9])?([0-9]){5}$",
+        "socialsecurity": "^[0-9]{9}$"
     },
-    {
-        "year": "",
-        "month": "",
-        "day": "",
-        "date": ""
+
+    "radio": {
+        "_id19": "^(NORMAL|OPTIONAL)_COURSE$",
+        "_id121": "^(AND|OR)$",
+        "calendarviewtype": "^(ALL_LESSONS|PAST_LESSON|PAST_LESSON_WITHOUT_SUMMARY)$",
+        "listsummarytype": "^(ALL_CONTENT|SUMMARIZED)$",
+        "newperiodtype": "^(EXAMS|EXAMS_SPECIAL_SEASON|GRADE_SUBMISSION|GRADE_SUBMISSION_SPECIAL_SEASON|LESSONS)$",
+        "searchtype": "^(LESSONS|EXECUTION_COURSE|PERSON|SPACE|WRITTEN_EVALUATION)$",
+        "summariesorder": "^(DECREASING|GROWING)$",
+        "summarytype": "^(EXTRA|NORMAL)_SUMMARY$",
+        "isoptional": "^(false|true)$",
+        "lessonplanningavailable": "^(false|true)$"
     },
-    {
-        "socialsecurity": ""
+
+    "checkbox": {
+        "defaultcontact": "",
+        "privacypolicy": "",
+        "viewphoto": "",
+        "visible": "",
+        "executioncourselogtypes": "^[a-zA-Z]{17}$",
+        "months": "^[a-zA-Z]{8}$",
+        "professorships": "^[0-9]{15}$"
     }
-]
+}

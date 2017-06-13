@@ -7,33 +7,31 @@ import json
 import globalvars
 
 
-def build_field_data(submitter):
+def build_field_data(form):
     """
         Creates a dictionary containing the fields' data
     """
 
     field_list = []
-    for field in submitter.form.get_fields():
-        field_data = {
-            "name": field.get_name(),
-            "type": field.get_type(),
-            "value": field.get_value()
-        }
-        field_list.append(field_data)
+    for field in form.fields:
+        field_list.append({
+            "name": field.name,
+            "type": field.type,
+            "value": field.value
+        })
 
     return field_list
 
 
-def build_error_data(submitter, code, message):
+def build_error_data(form, code, message):
     """
         Creates a dictionary containing the form's and error's data
     """
 
     return {
-        "id": submitter.form.get_id(),
-        "fields": build_field_data(submitter),
-        "action": submitter.form.get_action(),
-        "method": submitter.form.get_method(),
+        "fields": build_field_data(form),
+        "action": form.action,
+        "method": form.method,
         "error": {
             "code": code,
             "message": message
@@ -48,26 +46,13 @@ def generate_json_report():
 
     final_data = []
     for url, form_data in globalvars.ERRORS.items():
-        final_data.append({"url": url, "forms": form_data})
+        final_data.append({
+            "url": url,
+            "forms": form_data
+        })
 
     with open("output/report.json", "w") as report_file:
         json.dump(final_data, report_file)
-
-
-def generate_html_report():
-    """
-        Generates HTML report file from JSON file
-    """
-
-    generate_json_report()
-
-    templates = load_templates()
-
-    with open("output/report.json", "r") as json_file:
-        json_data = json.loads(json_file.read())
-
-    with open("output/report.html", "w") as report_file:
-        report_file.write(templates[0].replace("{pages}", fill_page_template(json_data, templates)))
 
 
 def load_templates():
@@ -90,6 +75,20 @@ def load_templates():
     return main, page, form, field
 
 
+def generate_html_report():
+    """
+        Generates HTML report file from JSON file
+    """
+
+    templates = load_templates()
+
+    with open("output/report.json", "r") as json_file:
+        json_report = json.loads(json_file.read())
+
+    with open("output/report.html", "w") as report_file:
+        report_file.write(templates[0].replace("{pages}", fill_page_template(json_report, templates)))
+
+
 def fill_page_template(pages, templates):
     """
         Substitute the URL and list of forms for all the pages
@@ -106,24 +105,22 @@ def fill_page_template(pages, templates):
 
 def fill_form_template(forms, templates):
     """
-        Substitute the id, method, action, code message and list of fields for
-        all the forms
+        Substitute the method, action, code message and list of fields for all the forms
     """
 
     final_template = ""
     for form in forms:
         final_template += (templates[2]
-                           .replace("{id}", form['id'])
                            .replace("{method}", form['method'])
                            .replace("{action}", form['action'])
                            .replace("{code}", form['error']['code'])
                            .replace("{message}", form['error']['message'])
-                           .replace("{fields}", fill_field_template(form['fields'], templates)))
+                           .replace("{fields}", fill_fields_template(form['fields'], templates)))
 
     return final_template
 
 
-def fill_field_template(fields, templates):
+def fill_fields_template(fields, templates):
     """
         Substitute the name, type and value for all the fields
     """

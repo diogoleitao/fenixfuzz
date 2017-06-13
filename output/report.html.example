@@ -3,40 +3,76 @@
     </head>
     <body>
         <h1>Results</h1>
-        <h3>URL: fenix.tecnico.ulisboa.pt/example</h3>
+        <h3>URL: http://fenix.tecnico.ulisboa.pt/example</h3>
         <hr>
         <ul>
-            <li><b>ID:</b> 12345</li>
-            <li><b>Fields:</b></li>
+            <li>
+                <b>Fields:</b>
+            </li>
             <ul>
-                <li><b>Name:</b> studentID</li>
-                <li><b>Type:</b> text</li>
-                <li><b>Value:</b> ist100000</li>
+                <li>
+                    <b>Name:</b> studentID
+                </li>
+                <li>
+                    <b>Type:</b> text
+                </li>
+                <li>
+                    <b>Value:</b> ist100000
+                </li>
                 <br>
-                <li><b>Name:</b> personalEmail</li>
-                <li><b>Type:</b> email</li>
-                <li><b>Value:</b> example@error.com</li>
+                <li>
+                    <b>Name:</b> personalEmail
+                </li>
+                <li>
+                    <b>Type:</b> email
+                </li>
+                <li>
+                    <b>Value:</b> example@error.com
+                </li>
                 <br>
             </ul>
-            <li><b>Action:</b> /submit_info.do</li>
-            <li><b>Method:</b> GET</li>
-            <li><b>Code:</b> 500</li>
-            <li><b>Message:</b> An error occurred.</li>
+            <li>
+                <b>Action:</b> /submit_info.do
+            </li>
+            <li>
+                <b>Method:</b> GET
+            </li>
+            <li>
+                <b>Code:</b> 500
+            </li>
+            <li>
+                <b>Message:</b> An error occurred.
+            </li>
         </ul>
         <hr>
         <ul>
-            <li><b>ID:</b> 67890</li>
-            <li><b>Fields:</b></li>
+            <li>
+                <b>Fields:</b>
+            </li>
             <ul>
-                <li><b>Name:</b> contact</li>
-                <li><b>Type:</b> text</li>
-                <li><b>Value:</b> +315961234567</li>
+                <li>
+                    <b>Name:</b> contact
+                </li>
+                <li>
+                    <b>Type:</b> text
+                </li>
+                <li>
+                    <b>Value:</b> +315961234567
+                </li>
                 <br>
             </ul>
-            <li><b>Action:</b> /update_contact.do</li>
-            <li><b>Method:</b> POST</li>
-            <li><b>Code:</b> 501</li>
-            <li><b>Message:</b> Functionality not implemented.</li>
+            <li>
+                <b>Action:</b> /update_contact.do
+            </li>
+            <li>
+                <b>Method:</b> POST
+            </li>
+            <li>
+                <b>Code:</b> 501
+            </li>
+            <li>
+                <b>Message:</b> Functionality not implemented.
+            </li>
         </ul>
         <hr>
         <hr>

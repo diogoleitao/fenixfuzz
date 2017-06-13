@@ -3,7 +3,6 @@
         "url": "fenix.tecnico.ulisboa.pt/example",
         "forms": [
             {
-                "id": "12345",
                 "fields": [
                     {
                         "name": "studentID",
@@ -24,7 +23,6 @@
                 }
             },
             {
-                "id": "67890",
                 "fields": [
                     {
                         "name": "contact",

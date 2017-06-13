@@ -1,0 +1,10 @@
+{
+	"exclude": [
+	    "/downloadFile",
+	    "/logout"
+	],
+
+	"sample": [
+		"/viewSpaces"
+	]
+}
