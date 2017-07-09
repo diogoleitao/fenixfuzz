@@ -49,18 +49,21 @@ def crawl(url, cookies):
         them to the queue if they weren't already visited.
     """
 
+    print("GET on url " + url)
+
     if excludable(url):
         return
 
-    response = requests.get(url, cookies=cookies)
+    response = requests.get(normalize_url(url), cookies=cookies)
     html_tree = response.text
 
     for anchor in BeautifulSoup(html_tree, "html.parser").find_all("a"):
         try:
             href = anchor.get("href")
+            print("- New href " + str(href))
 
             # Only save same domain links
-            if href.startswith(globalvars.CONTEXT_PATH) or href.startswith(globalvars.BASE_URL):
+            if href is not None and href.startswith(globalvars.CONTEXT_PATH) or href.startswith(globalvars.BASE_URL):
                 if href not in globalvars.CRAWLED_LINKS_QUEUE:
                     if any(pattern in url for pattern in SAMPLE_URLS):
                         continue
@@ -86,7 +89,9 @@ def parse(url, cookies):
         the form to the proper URL.
     """
 
-    response = requests.get(url, cookies=cookies)
+    print("Parsing forms on URL " + url)
+
+    response = requests.get(normalize_url(url), cookies=cookies)
     html_tree = response.text
 
     field_list = []

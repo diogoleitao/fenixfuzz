@@ -16,17 +16,17 @@ USAGE:\n\
             Path to the .properties file needed to configure the fuzzer.\n\
             Example: /path/to/fenixfuzz.properties.\n\n\
 OPTIONS:\n\
-        -j, --json-file:\n\
-            Override default path for the JSON report file.\n\
+        -j, --json-report:\n\
+            Override default path (output/report.json) for the JSON report file.\n\
             Example: /path/to/report.json.\n\n\
-        -html:\n\
+        -g, --generate-html-report:\n\
             If present, an HTML report file will be generated.\n\
-            The report file will be created in the \"output\" directory.\n\n\
-        -r, --report-file:\n\
-            Override default path for the HTML report file.\n\
+            The report file will be created in the \"output\" directory (unless overridden).\n\n\
+        -r, --html-report:\n\
+            Override default path (output/report.html) for the HTML report file.\n\
             Example: /path/to/report.html.\n\n\
         -h, --help:\n\
-            Print this text."
+            Print this text.\n"
 
 ERROR_MESSAGE = "Please check that a value was correctly specified for the {0} option."
 
@@ -43,44 +43,48 @@ def parse_command_line():
 
     if "-f" in sys.argv or "--file" in sys.argv:
         try:
-            path_index = sys.argv.index("-f") + 1
+            file_index = sys.argv.index("-f") + 1
         except ValueError:
-            path_index = sys.argv.index("--file") + 1
+            file_index = sys.argv.index("--file") + 1
 
         try:
-            ffm_path = sys.argv[path_index]
-            if not os.path.isfile(ffm_path):
+            properties_file = sys.argv[file_index]
+            if not os.path.isfile(properties_file):
                 terminate(ERROR_MESSAGE.format("-f/--file"), 1)
         except IndexError:
             terminate(ERROR_MESSAGE.format("-f/--file"), 1)
     else:
         terminate("-f/--file option not specified", 1)
 
-    if "-j" in sys.argv or "--json-file" in sys.argv:
+    if "-j" in sys.argv or "--json-report" in sys.argv:
         try:
-            iter_index = sys.argv.index("-j") + 1
+            json_report_index = sys.argv.index("-j") + 1
         except ValueError:
-            iter_index = sys.argv.index("--json-file") + 1
+            json_report_index = sys.argv.index("--json-report") + 1
 
         try:
-            json_file_path = sys.argv[iter_index]
+            json_report_file = sys.argv[json_report_index]
         except IndexError:
-            terminate(ERROR_MESSAGE.format("-j/--json-file"), 1)
+            terminate(ERROR_MESSAGE.format("-j/--json-report"), 1)
+    else:
+        json_report_file = None
 
-    html = True if "-html" in sys.argv else False
+    generate_html_report = True if "-g" in sys.argv or "--generate-html-report" in sys.argv else False
 
-    if "-r" in sys.argv or "--report-file" in sys.argv:
+    if generate_html_report and ("-r" in sys.argv or "--html-report" in sys.argv):
         try:
-            iter_index = sys.argv.index("-r") + 1
+            html_report_index = sys.argv.index("-r") + 1
         except ValueError:
-            iter_index = sys.argv.index("--report-file") + 1
+            html_report_index = sys.argv.index("--html-report") + 1
 
         try:
-            report_file_path = sys.argv[iter_index]
+            html_report_file = sys.argv[html_report_index]
         except IndexError:
-            terminate(ERROR_MESSAGE.format("-r/--report-file"), 1)
+            terminate(ERROR_MESSAGE.format("-r/--html-report"), 1)
+    else:
+        html_report_file = None
 
-    return ffm_path, json_file_path, html, report_file_path
+    return properties_file, json_report_file, generate_html_report, html_report_file
 
 
 def read_properties_file(path, sep="=", comment_char="#"):
@@ -90,15 +94,15 @@ def read_properties_file(path, sep="=", comment_char="#"):
     """
 
     try:
-        props = {}
+        properties = {}
         with open(path, "r") as properties_file:
             for line in properties_file:
                 line = line.strip()
 
                 if line and not line.startswith(comment_char):
                     key_value = line.split(sep)
-                    props[key_value[0].strip()] = key_value[1].strip()
-        return props
+                    properties[key_value[0].strip()] = key_value[1].strip()
+        return properties
     except OSError:
         terminate(ERROR_MESSAGE.format("-f/--file"), 1)
 

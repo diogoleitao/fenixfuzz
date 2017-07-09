@@ -44,6 +44,11 @@ def generate_json_report():
         Generates JSON report file from the data gathered
     """
 
+    if globalvars.JSON_REPORT_FILE is None:
+        output_dir = "output/report.json"
+    else:
+        output_dir = globalvars.JSON_REPORT_FILE
+
     final_data = []
     for url, form_data in globalvars.ERRORS.items():
         final_data.append({
@@ -51,7 +56,7 @@ def generate_json_report():
             "forms": form_data
         })
 
-    with open("output/report.json", "w") as report_file:
+    with open(output_dir, "w") as report_file:
         json.dump(final_data, report_file)
 
 
@@ -82,10 +87,20 @@ def generate_html_report():
 
     templates = load_templates()
 
-    with open("output/report.json", "r") as json_file:
+    if globalvars.JSON_REPORT_FILE is None:
+        output_dir_json = "output/report.json"
+    else:
+        output_dir_json = globalvars.JSON_REPORT_FILE
+
+    if globalvars.GENERATE_HTML_REPORT:
+        output_dir_html = globalvars.HTML_REPORT_FILE
+    else:
+        output_dir_html = "output/report.html"
+
+    with open(output_dir_json, "r") as json_file:
         json_report = json.loads(json_file.read())
 
-    with open("output/report.html", "w") as report_file:
+    with open(output_dir_html, "w") as report_file:
         report_file.write(templates[0].replace("{pages}", fill_page_template(json_report, templates)))
 
 

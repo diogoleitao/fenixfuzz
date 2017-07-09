@@ -26,12 +26,12 @@ START_PAGE = None
 LOGIN_ENDPOINT = None
 # Local instance's base URL (derived)
 BASE_URL = None
-# Full path for the JSON report file
-JSON_FILE_PATH = None
-# Full path for the HTML report file
-REPORT_FILE_PATH = None
+# JSON report file
+JSON_REPORT_FILE = None
 # Output HTML report?
-HTML_REPORT = None
+GENERATE_HTML_REPORT = None
+# HTML report file
+HTML_REPORT_FILE = None
 
 
 #######################
