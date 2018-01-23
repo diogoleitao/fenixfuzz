@@ -49,7 +49,7 @@ def crawl(url, cookies):
         them to the queue if they weren't already visited.
     """
 
-    print("GET on url " + url)
+    print("GETting " + url)
 
     if excludable(url):
         return
@@ -60,7 +60,7 @@ def crawl(url, cookies):
     for anchor in BeautifulSoup(html_tree, "html.parser").find_all("a"):
         try:
             href = anchor.get("href")
-            print("- New href " + str(href))
+            # print("- New href " + str(href))
 
             # Only save same domain links
             if href is not None and href.startswith(globalvars.CONTEXT_PATH) or href.startswith(globalvars.BASE_URL):
